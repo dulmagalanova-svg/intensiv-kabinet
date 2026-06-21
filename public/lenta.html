@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Лента — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="nav"></div>
+
+<main class="wrap page">
+  <h2>Лента</h2>
+  <p class="lead">Расписание эфиров и записи. Эфиры идут в Zoom, записи появляются здесь после.</p>
+
+  <div id="list"><div class="center">Загружаю…</div></div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
+
+const session = await requireAuth()
+if(session){
+  renderNav('lenta')
+  loadSchedule()
+}
+
+const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек']
+
+async function loadSchedule(){
+  const list = document.getElementById('list')
+  const { data: items, error } = await supabase.from('schedule')
+    .select('id,session_number,title,description,starts_at,zoom_url,replay_url').order('sort')
+
+  if(error){ list.innerHTML = `<div class="locked">Ошибка: ${error.message}</div>`; return }
+  if(!items || !items.length){
+    list.innerHTML = `<div class="locked"><b>Расписание скоро появится.</b><br>Даты эфиров добавим перед стартом.</div>`
+    return
+  }
+
+  list.innerHTML = items.map(e => {
+    let dnum = '—', mon = ''
+    if(e.starts_at){
+      const d = new Date(e.starts_at)
+      dnum = d.getDate(); mon = MONTHS[d.getMonth()]
+    }
+    const time = e.starts_at
+      ? new Date(e.starts_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}) + ' МСК'
+      : ''
+    const links = []
+    if(e.zoom_url) links.push(`<a class="live" href="${e.zoom_url}" target="_blank" rel="noopener">Подключиться</a>`)
+    if(e.replay_url) links.push(`<a class="replay" href="${e.replay_url}" target="_blank" rel="noopener">Смотреть запись</a>`)
+    const linksHtml = links.length ? `<div class="links">${links.join('')}</div>` : `<span class="badge-soon">дата уточняется</span>`
+    return `
+      <div class="ev">
+        <div class="when"><div class="d">${dnum}</div><div class="m">${mon}</div></div>
+        <div class="body">
+          <div class="t">${e.title}</div>
+          <div class="desc">${time}${e.description ? (time ? ' · ' : '') + e.description : ''}</div>
+          ${linksHtml}
+        </div>
+      </div>`
+  }).join('')
+}
+</script>
+</body>
+</html>

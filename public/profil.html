@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Профиль — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="nav"></div>
+
+<main class="wrap page">
+  <h2>Профиль</h2>
+  <p class="lead">Твой аккаунт и доступ к интенсиву.</p>
+
+  <div class="panel">
+    <div class="prow"><span class="k">Почта</span><span class="v" id="email">—</span></div>
+    <div class="prow"><span class="k">Доступ к урокам</span><span class="v" id="access">—</span></div>
+    <div class="prow"><span class="k">Прогресс</span><span class="v" id="prog">—</span></div>
+  </div>
+
+  <button class="btn" id="logout" style="max-width:240px">Выйти из аккаунта</button>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth, currentUser, signOut } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
+
+document.getElementById('logout').onclick = () => signOut()
+
+const session = await requireAuth()
+if(session){
+  renderNav('profil')
+  init()
+}
+
+async function init(){
+  const user = await currentUser()
+  document.getElementById('email').textContent = user?.email || '—'
+
+  const { data: prof } = await supabase.from('profiles').select('paid').maybeSingle()
+  const paid = !!(prof && prof.paid)
+  document.getElementById('access').innerHTML = paid
+    ? '<span class="pill ok">Открыт</span>'
+    : '<span class="pill no">Закрыт</span>'
+
+  const { data: lessons } = await supabase.from('lessons').select('id')
+  const { data: progress } = await supabase.from('progress').select('lesson_id,done')
+  const total = (lessons || []).length
+  const done = (progress || []).filter(p => p.done).length
+  document.getElementById('prog').textContent = total ? `${done} из ${total}` : '—'
+}
+</script>
+</body>
+</html>

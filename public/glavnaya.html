@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Главная — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="nav"></div>
+
+<main class="wrap page">
+  <h2>Добро пожаловать<span id="name"></span></h2>
+  <p class="lead">Это твой кабинет интенсива «AI-команда». Отсюда — ко всем материалам, расписанию эфиров и профилю.</p>
+
+  <div class="panel" id="nextEv">
+    <div class="k">Ближайший эфир</div>
+    <div id="nextEvBody" style="margin-top:6px;color:#4a463d">Загружаю…</div>
+  </div>
+
+  <div class="panel">
+    <div class="k">Твой прогресс</div>
+    <div id="progressText" style="margin-top:6px;font-weight:700">—</div>
+    <div class="progress-bar"><i id="progressBar" style="width:0%"></i></div>
+  </div>
+
+  <div class="tiles">
+    <a class="tile" href="/lessons.html">
+      <div class="ic">📚</div>
+      <div class="t">Материалы</div>
+      <div class="d">Уроки: смотри, проходи, отмечай галочками.</div>
+    </a>
+    <a class="tile" href="/lenta.html">
+      <div class="ic">📅</div>
+      <div class="t">Лента</div>
+      <div class="d">Расписание эфиров и записи.</div>
+    </a>
+    <a class="tile" href="/profil.html">
+      <div class="ic">👤</div>
+      <div class="t">Профиль</div>
+      <div class="d">Твой аккаунт и доступ.</div>
+    </a>
+  </div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth, currentUser } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
+
+const session = await requireAuth()
+if(session){
+  renderNav('glavnaya')
+  init()
+}
+
+async function init(){
+  const user = await currentUser()
+  const nameEl = document.getElementById('name')
+  if(user?.email) nameEl.textContent = ', ' + user.email.split('@')[0]
+
+  const { data: lessons } = await supabase.from('lessons').select('id')
+  const { data: prog } = await supabase.from('progress').select('lesson_id,done')
+  const total = (lessons || []).length
+  const done = (prog || []).filter(p => p.done).length
+  const pct = total ? Math.round(done / total * 100) : 0
+  document.getElementById('progressText').textContent =
+    total ? `${done} из ${total} уроков пройдено` : 'Уроки скоро появятся'
+  document.getElementById('progressBar').style.width = pct + '%'
+
+  const { data: ev } = await supabase.from('schedule')
+    .select('title,starts_at,replay_url,zoom_url').order('sort').limit(1)
+  const box = document.getElementById('nextEvBody')
+  if(ev && ev.length){
+    const e = ev[0]
+    const when = e.starts_at ? new Date(e.starts_at).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}) : 'дата скоро'
+    box.innerHTML = `<b>${e.title}</b><br><span style="color:#6b665c">${when}</span>` +
+      (e.zoom_url ? ` · <a class="link" href="${e.zoom_url}" target="_blank">ссылка на эфир</a>` : '') +
+      (e.replay_url ? ` · <a class="link" href="${e.replay_url}" target="_blank">запись</a>` : '')
+  } else {
+    box.innerHTML = 'Расписание эфиров появится здесь.'
+  }
+}
+</script>
+</body>
+</html>
