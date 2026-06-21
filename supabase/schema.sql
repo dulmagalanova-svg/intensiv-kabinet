@@ -58,21 +58,27 @@ alter table public.lessons  enable row level security;
 alter table public.progress enable row level security;
 alter table public.homework enable row level security;
 
+-- ВАЖНО: проверки paid/is_admin вынесены в SECURITY DEFINER функции.
+-- Если ссылаться на profiles прямо в политике profiles — Postgres даёт
+-- "infinite recursion detected in policy". Функция-definer обходит RLS.
+create or replace function public.is_admin() returns boolean
+  language sql security definer stable set search_path = public as $$
+    select coalesce((select is_admin from public.profiles where id = auth.uid()), false)
+  $$;
+create or replace function public.is_paid() returns boolean
+  language sql security definer stable set search_path = public as $$
+    select coalesce((select paid from public.profiles where id = auth.uid()), false)
+  $$;
+
 -- профиль: ученик видит только свой; админ видит все
 drop policy if exists "own profile" on public.profiles;
 create policy "own profile" on public.profiles
-  for select using (
-    auth.uid() = id
-    or exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
-  );
+  for select using (auth.uid() = id or public.is_admin());
 
 -- уроки: видны ТОЛЬКО оплаченным аутентифицированным
 drop policy if exists "lessons for paid" on public.lessons;
 create policy "lessons for paid" on public.lessons
-  for select using (
-    exists (select 1 from public.profiles p
-            where p.id = auth.uid() and p.paid = true)
-  );
+  for select using (public.is_paid());
 
 -- прогресс: ученик читает/пишет только свой
 drop policy if exists "own progress" on public.progress;
@@ -82,10 +88,8 @@ create policy "own progress" on public.progress
 -- домашки: ученик создаёт/видит свои; админ видит все
 drop policy if exists "own homework" on public.homework;
 create policy "own homework" on public.homework
-  for all using (
-    auth.uid() = user_id
-    or exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
-  ) with check (auth.uid() = user_id);
+  for all using (auth.uid() = user_id or public.is_admin())
+  with check (auth.uid() = user_id);
 
 -- ============ ТРИГГЕР АВТО-ПРОФИЛЯ ============
 -- при регистрации создаём профиль; если email уже оплачен — сразу paid=true
