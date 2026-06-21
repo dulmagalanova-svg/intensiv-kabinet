@@ -45,8 +45,8 @@
 <script type="module">
 import { signUp, signIn, currentUser } from '/js/auth.js'
 
-// Уже вошёл — сразу на уроки.
-currentUser().then(u => { if(u) location.href = '/lessons.html' })
+// Уже вошёл — сразу на Главную.
+currentUser().then(u => { if(u) location.href = '/glavnaya.html' })
 
 let mode = 'login' // 'login' | 'signup'
 const tabLogin = document.getElementById('tab-login')
@@ -92,7 +92,7 @@ document.getElementById('authForm').onsubmit = async (e) => {
     } else {
       const { error } = await signIn(email, password)
       if(error) throw error
-      location.href = '/lessons.html'
+      location.href = '/glavnaya.html'
     }
   } catch(err){
     showMsg(translateError(err.message), false)

@@ -3,24 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Мои уроки — Кабинет интенсива</title>
+<title>Материалы — Кабинет интенсива</title>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
-<div class="topbar">
-  <div class="row">
-    <span class="brand">Интенсив · AI-команда</span>
-    <span>
-      <span class="who" id="who"></span>
-      <button id="logout">Выйти</button>
-    </span>
-  </div>
-</div>
+<div id="nav"></div>
 
 <main class="wrap lessons">
-  <h2 style="margin-bottom:4px">Мои уроки</h2>
-  <p class="sub" style="color:var(--muted);margin-bottom:8px">Отмечай пройденное галочкой. Прогресс сохраняется.</p>
+  <h2 style="margin-bottom:4px">Материалы</h2>
+  <p class="lead">Уроки интенсива. Открывай по очереди, отмечай пройденное галочкой — прогресс сохраняется.</p>
 
   <div id="list"><div class="center">Загружаю…</div></div>
 </main>
@@ -29,21 +21,18 @@
 
 <script type="module">
 import { supabase } from '/js/supabase-client.js'
-import { requireAuth, signOut, currentUser } from '/js/auth.js'
-
-document.getElementById('logout').onclick = () => signOut()
+import { requireAuth } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
 
 const session = await requireAuth()
 if(session){
-  const user = await currentUser()
-  document.getElementById('who').textContent = user?.email || ''
+  renderNav('materialy')
   renderLessons()
 }
 
 async function renderLessons(){
   const list = document.getElementById('list')
 
-  // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
   const { data: lessons, error } = await supabase
     .from('lessons').select('id,slug,title,day,sort').order('sort')
 
