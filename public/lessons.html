@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои уроки — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <span class="brand">Интенсив · AI-команда</span>
+    <span>
+      <span class="who" id="who"></span>
+      <button id="logout">Выйти</button>
+    </span>
+  </div>
+</div>
+
+<main class="wrap lessons">
+  <h2 style="margin-bottom:4px">Мои уроки</h2>
+  <p class="sub" style="color:var(--muted);margin-bottom:8px">Отмечай пройденное галочкой. Прогресс сохраняется.</p>
+
+  <div id="list"><div class="center">Загружаю…</div></div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth, signOut, currentUser } from '/js/auth.js'
+
+document.getElementById('logout').onclick = () => signOut()
+
+const session = await requireAuth()
+if(session){
+  const user = await currentUser()
+  document.getElementById('who').textContent = user?.email || ''
+  renderLessons()
+}
+
+async function renderLessons(){
+  const list = document.getElementById('list')
+
+  // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
+  const { data: lessons, error } = await supabase
+    .from('lessons').select('id,slug,title,day,sort').order('sort')
+
+  if(error){ list.innerHTML = `<div class="locked">Ошибка загрузки: ${error.message}</div>`; return }
+
+  if(!lessons || lessons.length === 0){
+    list.innerHTML = `<div class="locked">
+      <b>Доступ к урокам пока закрыт.</b><br>
+      Уроки откроются автоматически после оплаты. Если уже оплатил — напиши нам.
+    </div>`
+    return
+  }
+
+  const { data: prog } = await supabase.from('progress').select('lesson_id,done')
+  const doneSet = new Set((prog || []).filter(p => p.done).map(p => p.lesson_id))
+
+  list.innerHTML = lessons.map(l => `
+    <a class="lcard" href="/lesson.html?id=${l.id}">
+      <span class="num">${l.day}</span>
+      <span>
+        <div class="t">${l.title}</div>
+        <div class="d">Урок ${l.id}</div>
+      </span>
+      <span class="done ${doneSet.has(l.id) ? 'on' : ''}">${doneSet.has(l.id) ? '✓' : ''}</span>
+    </a>
+  `).join('')
+}
+</script>
+</body>
+</html>

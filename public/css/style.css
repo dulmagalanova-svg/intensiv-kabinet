@@ -1,0 +1,60 @@
+/* Кабинет интенсива — бело-жёлто-чёрный стиль (из intensiv-uroki-sayt) */
+:root{
+  --bg:#fff;--soft:#faf7ee;--ink:#141414;--muted:#6b665c;
+  --gold:#E8B923;--gold2:#F7D14B;--golddark:#9c7a00;
+  --line:#efe9d8;--green:#2e9e54;--blue:#1e6fd0;--dark:#0d0d0d;--err:#c0392b
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+h1{font-size:30px;font-weight:800;letter-spacing:-.01em;line-height:1.12}
+h2{font-size:24px;font-weight:800;line-height:1.15}
+h3{font-size:18px;font-weight:800}
+a.link{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1.5px solid #c5dcf5}
+
+/* HERO */
+.hero{background:radial-gradient(120% 130% at 80% 0%,#221c0a,var(--dark) 70%);color:#fff;padding:44px 0 36px}
+.hero .kick{color:var(--gold);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:12px;margin-bottom:12px}
+.hero h1{color:#fff;margin-bottom:14px}
+.hero p{color:#c7c2b6;font-size:16px;max-width:560px}
+
+/* CARD / AUTH */
+.card{max-width:420px;margin:34px auto;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:0 8px 30px rgba(20,18,10,.06)}
+.card h2{margin-bottom:6px}
+.card .sub{color:var(--muted);font-size:14.5px;margin-bottom:18px}
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--soft);border-radius:12px;padding:4px}
+.tabs button{flex:1;border:none;background:transparent;padding:9px;border-radius:9px;font-weight:700;font-size:14.5px;color:var(--muted);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+label{display:block;font-size:13px;font-weight:700;color:#4a463d;margin:12px 0 5px}
+input{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-family:inherit}
+input:focus{outline:none;border-color:var(--gold)}
+.btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:15.5px;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.ghost{background:transparent;color:var(--golddark);border:1.5px solid #f0dca0}
+.msg{margin-top:14px;font-size:14px;padding:10px 13px;border-radius:10px;display:none}
+.msg.show{display:block}
+.msg.ok{background:#e4f6ea;color:#1f7a3d;border:1px solid #b6e3c4}
+.msg.err{background:#fdecea;color:var(--err);border:1px solid #f3c2bd}
+
+/* TOPBAR (внутри кабинета) */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(13,13,13,.96);backdrop-filter:blur(8px);border-bottom:1px solid #2a2516}
+.topbar .row{max-width:860px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;justify-content:space-between}
+.topbar .brand{color:#fff;font-weight:800;font-size:15px}
+.topbar .who{color:#cdc7b9;font-size:13px;margin-right:12px}
+.topbar button{background:transparent;border:1px solid #3a3320;color:#f3e9cf;border-radius:9px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer}
+
+/* LESSON LIST */
+.lessons{padding:30px 0}
+.lcard{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;margin:12px 0;text-decoration:none;color:var(--ink)}
+.lcard:hover{border-color:#f0dca0;background:#fffdf6}
+.lcard .num{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;display:flex;align-items:center;justify-content:center}
+.lcard .t{font-weight:800;font-size:16.5px}
+.lcard .d{color:var(--muted);font-size:13.5px}
+.lcard .done{margin-left:auto;flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+.lcard .done.on{background:var(--green);border-color:var(--green)}
+.locked{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center;color:#4a463d;margin:20px 0}
+.locked b{color:var(--golddark)}
+
+.center{min-height:50vh;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+footer{padding:30px 0;color:#9a958a;font-size:13px;text-align:center}

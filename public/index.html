@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кабинет интенсива «AI-команда»</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kick">Интенсив · AI-команда на Claude</div>
+    <h1>Личный кабинет</h1>
+    <p>Войди, чтобы открыть уроки. Нет аккаунта — зарегистрируйся по почте. Доступ к урокам открывается после оплаты.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <div class="tabs">
+      <button id="tab-login" class="on">Вход</button>
+      <button id="tab-signup">Регистрация</button>
+    </div>
+
+    <h2 id="formTitle">С возвращением</h2>
+    <div class="sub" id="formSub">Введи почту и пароль.</div>
+
+    <form id="authForm">
+      <label for="email">Почта</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@mail.ru" required>
+
+      <label for="password">Пароль</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="минимум 6 символов" minlength="6" required>
+
+      <button class="btn" id="submitBtn" type="submit">Войти</button>
+    </form>
+
+    <div class="msg" id="msg"></div>
+  </div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { signUp, signIn, currentUser } from '/js/auth.js'
+
+// Уже вошёл — сразу на уроки.
+currentUser().then(u => { if(u) location.href = '/lessons.html' })
+
+let mode = 'login' // 'login' | 'signup'
+const tabLogin = document.getElementById('tab-login')
+const tabSignup = document.getElementById('tab-signup')
+const title = document.getElementById('formTitle')
+const sub = document.getElementById('formSub')
+const submitBtn = document.getElementById('submitBtn')
+const pw = document.getElementById('password')
+const msg = document.getElementById('msg')
+
+function setMode(m){
+  mode = m
+  const login = m === 'login'
+  tabLogin.classList.toggle('on', login)
+  tabSignup.classList.toggle('on', !login)
+  title.textContent = login ? 'С возвращением' : 'Создать аккаунт'
+  sub.textContent = login ? 'Введи почту и пароль.' : 'Зарегистрируйся по почте — это бесплатно.'
+  submitBtn.textContent = login ? 'Войти' : 'Зарегистрироваться'
+  pw.setAttribute('autocomplete', login ? 'current-password' : 'new-password')
+  hideMsg()
+}
+tabLogin.onclick = () => setMode('login')
+tabSignup.onclick = () => setMode('signup')
+
+function showMsg(text, ok){
+  msg.textContent = text
+  msg.className = 'msg show ' + (ok ? 'ok' : 'err')
+}
+function hideMsg(){ msg.className = 'msg' }
+
+document.getElementById('authForm').onsubmit = async (e) => {
+  e.preventDefault()
+  hideMsg()
+  submitBtn.disabled = true
+  const email = document.getElementById('email').value.trim()
+  const password = pw.value
+  try {
+    if(mode === 'signup'){
+      const { error } = await signUp(email, password)
+      if(error) throw error
+      showMsg('Аккаунт создан. Если попросит — подтверди почту по письму, затем войди.', true)
+      setTimeout(() => setMode('login'), 1500)
+    } else {
+      const { error } = await signIn(email, password)
+      if(error) throw error
+      location.href = '/lessons.html'
+    }
+  } catch(err){
+    showMsg(translateError(err.message), false)
+  } finally {
+    submitBtn.disabled = false
+  }
+}
+
+function translateError(m){
+  if(/Invalid login credentials/i.test(m)) return 'Неверная почта или пароль.'
+  if(/already registered/i.test(m)) return 'Такая почта уже зарегистрирована — войди.'
+  if(/Password should be at least/i.test(m)) return 'Пароль слишком короткий (минимум 6 символов).'
+  if(/Email not confirmed/i.test(m)) return 'Почта не подтверждена — проверь письмо.'
+  return m
+}
+</script>
+</body>
+</html>

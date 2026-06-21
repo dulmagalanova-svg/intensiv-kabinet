@@ -1,0 +1,7 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# SPA-страницы статичны, отдельная сборка не нужна.
+[build.environment]
+  NODE_VERSION = "20"
