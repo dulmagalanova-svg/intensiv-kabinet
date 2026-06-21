@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Урок — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .lesson-body{padding:24px 0 8px;font-size:16px;color:#2a2620}
+  .lesson-body h1{font-size:26px;margin:18px 0 8px}
+  .lesson-body h2{font-size:20px;margin:22px 0 8px}
+  .lesson-body h3{font-size:16.5px;margin:16px 0 6px;color:var(--golddark)}
+  .lesson-body p{margin:8px 0}
+  .lesson-body ul{padding-left:22px;margin:8px 0}
+  .lesson-body li{margin:5px 0}
+  .lesson-body a{color:var(--blue);font-weight:700}
+  /* видео */
+  .video{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin:8px 0 18px}
+  .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  /* блок команды с копированием */
+  .cmd-block{position:relative;margin:12px 0}
+  .cmd-block pre{background:#161310;color:#f3e9cf;border-radius:12px;padding:16px 16px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+  .copybtn{position:absolute;top:10px;right:10px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:12.5px;cursor:pointer}
+  .copybtn.done{background:var(--green);color:#fff}
+  /* домашка */
+  .hw{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:18px;margin:22px 0}
+  .hw h3{margin-bottom:8px}
+  .hw input[type=file]{display:block;margin:10px 0;font-size:14px}
+  /* подвал действий */
+  .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:24px 0 10px}
+  .back{color:var(--golddark);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <span class="brand"><a href="/lessons.html" style="color:#fff;text-decoration:none">← Уроки</a></span>
+    <span>
+      <span class="who" id="who"></span>
+      <button id="logout">Выйти</button>
+    </span>
+  </div>
+</div>
+
+<main class="wrap">
+  <div id="content"><div class="center">Загружаю урок…</div></div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth, signOut, currentUser } from '/js/auth.js'
+
+document.getElementById('logout').onclick = () => signOut()
+
+const params = new URLSearchParams(location.search)
+const lessonId = parseInt(params.get('id'), 10)
+
+const session = await requireAuth()
+let user = null
+if(session){
+  user = await currentUser()
+  document.getElementById('who').textContent = user?.email || ''
+  loadLesson()
+}
+
+async function loadLesson(){
+  const box = document.getElementById('content')
+  if(!lessonId && lessonId !== 0){ box.innerHTML = '<div class="locked">Урок не указан.</div>'; return }
+
+  const { data: lesson, error } = await supabase
+    .from('lessons').select('id,title,day,body_html,video_url').eq('id', lessonId).single()
+
+  if(error || !lesson){
+    box.innerHTML = `<div class="locked"><b>Урок недоступен.</b><br>Возможно, доступ ещё не открыт. Вернись к <a href="/lessons.html">списку уроков</a>.</div>`
+    return
+  }
+
+  const { data: prog } = await supabase
+    .from('progress').select('done').eq('lesson_id', lessonId).maybeSingle()
+  const done = !!(prog && prog.done)
+
+  box.innerHTML = `
+    <h1 style="margin:20px 0 6px">${lesson.title}</h1>
+    ${lesson.video_url ? `<div class="video"><iframe src="${lesson.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ''}
+    <div class="lesson-body">${lesson.body_html || ''}</div>
+    <div class="hw">
+      <h3>Домашнее задание</h3>
+      <p style="font-size:14.5px;color:#4a463d">Загрузи файл с результатом — мы проверим.</p>
+      <input type="file" id="hwFile">
+      <button class="btn" id="hwSend" style="max-width:240px">Сдать домашку</button>
+      <div class="msg" id="hwMsg"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="doneBtn" style="max-width:260px">${done ? 'Пройдено ✓' : 'Отметить пройденным'}</button>
+      <a class="back" href="/lessons.html">← ко всем урокам</a>
+    </div>
+  `
+
+  enhanceCopy()
+  wireDone(done)
+  wireHomework()
+}
+
+// Кнопка «Копировать» на каждый блок команды (<pre> внутри урока).
+function enhanceCopy(){
+  document.querySelectorAll('.lesson-body pre').forEach(pre => {
+    const wrap = document.createElement('div')
+    wrap.className = 'cmd-block'
+    pre.parentNode.insertBefore(wrap, pre)
+    wrap.appendChild(pre)
+    const btn = document.createElement('button')
+    btn.className = 'copybtn'
+    btn.textContent = 'Копировать'
+    btn.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText.trim())
+        btn.textContent = 'Скопировано ✓'; btn.classList.add('done')
+        setTimeout(() => { btn.textContent = 'Копировать'; btn.classList.remove('done') }, 1500)
+      } catch { btn.textContent = 'Выдели и скопируй' }
+    }
+    wrap.appendChild(btn)
+  })
+}
+
+function wireDone(done){
+  const btn = document.getElementById('doneBtn')
+  let isDone = done
+  btn.onclick = async () => {
+    isDone = !isDone
+    btn.disabled = true
+    const { error } = await supabase.from('progress')
+      .upsert({ user_id: user.id, lesson_id: lessonId, done: isDone, updated_at: new Date().toISOString() })
+    btn.disabled = false
+    if(error){ btn.textContent = 'Ошибка, попробуй ещё'; return }
+    btn.textContent = isDone ? 'Пройдено ✓' : 'Отметить пройденным'
+  }
+}
+
+function wireHomework(){
+  const send = document.getElementById('hwSend')
+  const fileInput = document.getElementById('hwFile')
+  const msg = document.getElementById('hwMsg')
+  send.onclick = async () => {
+    const file = fileInput.files[0]
+    if(!file){ showHw('Выбери файл.', false); return }
+    send.disabled = true
+    const path = `${user.id}/${lessonId}-${Date.now()}-${file.name}`
+    const up = await supabase.storage.from('homework').upload(path, file)
+    if(up.error){ showHw('Не удалось загрузить: ' + up.error.message, false); send.disabled = false; return }
+    const ins = await supabase.from('homework')
+      .insert({ user_id: user.id, lesson_id: lessonId, file_path: path })
+    send.disabled = false
+    if(ins.error){ showHw('Файл загружен, но запись не создана: ' + ins.error.message, false); return }
+    showHw('Домашка отправлена. Спасибо!', true)
+    fileInput.value = ''
+  }
+  function showHw(text, ok){
+    msg.textContent = text
+    msg.className = 'msg show ' + (ok ? 'ok' : 'err')
+  }
+}
+</script>
+</body>
+</html>

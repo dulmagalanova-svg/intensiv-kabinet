@@ -27,6 +27,7 @@ create table if not exists public.lessons (
   title text not null,
   day int not null default 0,
   body_html text not null default '',
+  video_url text,
   sort int not null default 0
 );
 
