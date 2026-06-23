@@ -18,6 +18,11 @@ a.link{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1.5p
 .hero .kick{color:var(--gold);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:12px;margin-bottom:12px}
 .hero h1{color:#fff;margin-bottom:14px}
 .hero p{color:#c7c2b6;font-size:16px;max-width:560px}
+.hero .avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);margin-bottom:16px;display:block}
+
+/* аватар на Главной */
+.welcome{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+.welcome .avatar{width:62px;height:62px;border-radius:50%;object-fit:cover;border:2.5px solid var(--gold);flex:0 0 auto}
 
 /* CARD / AUTH */
 .card{max-width:420px;margin:34px auto;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:0 8px 30px rgba(20,18,10,.06)}
