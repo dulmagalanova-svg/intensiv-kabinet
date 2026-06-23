@@ -10,6 +10,7 @@
 
 <header class="hero">
   <div class="wrap">
+    <img class="avatar" src="/dulma.jpg%20.png" alt="Dulma">
     <div class="kick">Интенсив · AI-команда на Claude</div>
     <h1>Личный кабинет</h1>
     <p>Войди, чтобы открыть уроки. Нет аккаунта — зарегистрируйся по почте. Доступ к урокам открывается после оплаты.</p>
@@ -45,10 +46,9 @@
 <script type="module">
 import { signUp, signIn, currentUser } from '/js/auth.js'
 
-// Уже вошёл — сразу на Главную.
 currentUser().then(u => { if(u) location.href = '/glavnaya.html' })
 
-let mode = 'login' // 'login' | 'signup'
+let mode = 'login'
 const tabLogin = document.getElementById('tab-login')
 const tabSignup = document.getElementById('tab-signup')
 const title = document.getElementById('formTitle')
