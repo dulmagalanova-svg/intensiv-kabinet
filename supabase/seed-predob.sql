@@ -51,7 +51,7 @@ $$),
 $$),
 
 (3, 'predob-3', 'Предобучение 3 · Техническая подготовка', 0, 3,
- 'https://kinescope.io/embed/hXsW9hjzfyQ4nVkKPyqZdy', $$
+ 'https://kinescope.io/embed/ordBQRojkkTCQxoZGgXyzb', $$
 <div class="say"><b>Ставим всё, что понадобится</b> — по шагам, командами. Это один раз, дальше всё работает.</div>
 <div class="big"><b>Список:</b> VS Code · Node.js · подписка Claude · Claude Code · bun · GitHub · Telegram · (для РФ) VPN.</div>
 <h2>Шаги установки</h2>
