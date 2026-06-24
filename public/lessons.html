@@ -42,6 +42,11 @@ if(session){
 async function renderLessons(){
   const list = document.getElementById('list')
 
+  // админ (Mrs) видит закрытые уроки для предпросмотра; ученики — нет
+  const me = await currentUser()
+  const { data: meProf } = await supabase.from('profiles').select('is_admin').eq('id', me.id).maybeSingle()
+  const isAdmin = !!(meProf && meProf.is_admin)
+
   // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
   const { data: lessons, error } = await supabase
     .from('lessons').select('id,slug,title,day,sort,unlock_at').order('sort')
@@ -66,7 +71,7 @@ async function renderLessons(){
 
   const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']
   const fmtDate = iso => { const d = new Date(iso); return d.getDate() + ' ' + MONTHS[d.getMonth()] }
-  const isLocked = l => l.unlock_at && new Date(l.unlock_at) > new Date()
+  const isLocked = l => !isAdmin && l.unlock_at && new Date(l.unlock_at) > new Date()
 
   const card = (l, badge) => isLocked(l) ? `
     <div class="lcard locked">
