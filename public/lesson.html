@@ -47,6 +47,12 @@
   .lesson-body .modes{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;margin:12px 0}
   .lesson-body .modes .m{padding:11px 16px;border-bottom:1px solid var(--line)}
   .lesson-body .modes .m:last-child{border-bottom:none}
+  .lesson-body .block{border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+  .lesson-body .block .bt{font-weight:800;font-size:16px;color:#141414;margin-bottom:2px}
+  .lesson-body .block .bt span{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:7px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-size:13px;margin-right:8px}
+  .lesson-body .block .what{font-size:15px;color:#2a2620;margin:6px 0}
+  .lesson-body .block .zachem{font-size:14.5px;color:#1a4a82;background:#e7f0fb;border:1px solid #c5dcf5;border-radius:8px;padding:7px 11px;margin-top:6px}
+  .lesson-body .block .zachem b{color:#0d3a6b}
   @media(max-width:640px){.lesson-body .goal{grid-template-columns:1fr}}
   /* видео */
   .video{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin:8px 0 18px}
@@ -106,10 +112,18 @@ async function loadLesson(){
   if(!lessonId && lessonId !== 0){ box.innerHTML = '<div class="locked">Урок не указан.</div>'; return }
 
   const { data: lesson, error } = await supabase
-    .from('lessons').select('id,title,day,body_html,video_url').eq('id', lessonId).single()
+    .from('lessons').select('id,title,day,body_html,video_url,unlock_at').eq('id', lessonId).single()
 
   if(error || !lesson){
     box.innerHTML = `<div class="locked"><b>Урок недоступен.</b><br>Возможно, доступ ещё не открыт. Вернись к <a href="/lessons.html">списку уроков</a>.</div>`
+    return
+  }
+
+  // урок ещё закрыт по дате — не показываем содержимое
+  if(lesson.unlock_at && new Date(lesson.unlock_at) > new Date()){
+    const M = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']
+    const d = new Date(lesson.unlock_at)
+    box.innerHTML = `<div class="locked"><b>🔒 Урок ещё закрыт.</b><br>Откроется ${d.getDate()} ${M[d.getMonth()]}. Пока доступно предобучение — вернись к <a href="/lessons.html">списку уроков</a>.</div>`
     return
   }
 
