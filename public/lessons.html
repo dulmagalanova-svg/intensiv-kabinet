@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Материалы — Кабинет интенсива</title>
 <link rel="stylesheet" href="/css/style.css">
+<style>
+  .lessons .sec{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9c7a00;margin:22px 4px 10px}
+  .lessons .sec:first-of-type{margin-top:8px}
+</style>
 </head>
 <body>
 
@@ -35,6 +39,7 @@ if(session){
 async function renderLessons(){
   const list = document.getElementById('list')
 
+  // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
   const { data: lessons, error } = await supabase
     .from('lessons').select('id,slug,title,day,sort').order('sort')
 
@@ -56,16 +61,29 @@ async function renderLessons(){
   const { data: prog } = await supabase.from('progress').select('lesson_id,done')
   const doneSet = new Set((prog || []).filter(p => p.done).map(p => p.lesson_id))
 
-  list.innerHTML = lessons.map(l => `
+  const card = (l, badge) => `
     <a class="lcard" href="/lesson.html?id=${l.id}">
-      <span class="num">${l.day}</span>
+      <span class="num">${badge}</span>
       <span>
         <div class="t">${l.title}</div>
-        <div class="d">Урок ${l.id}</div>
       </span>
       <span class="done ${doneSet.has(l.id) ? 'on' : ''}">${doneSet.has(l.id) ? '✓' : ''}</span>
-    </a>
-  `).join('')
+    </a>`
+
+  // Предобучение — day=0; основные уроки — day>=1.
+  const predob = lessons.filter(l => l.day === 0)
+  const main = lessons.filter(l => l.day > 0)
+
+  let html = ''
+  if(predob.length){
+    html += '<h3 class="sec">Предобучение</h3>'
+    html += predob.map((l, i) => card(l, i + 1)).join('')
+  }
+  if(main.length){
+    html += '<h3 class="sec">Уроки интенсива</h3>'
+    html += main.map(l => card(l, l.day)).join('')
+  }
+  list.innerHTML = html
 }
 </script>
 </body>
