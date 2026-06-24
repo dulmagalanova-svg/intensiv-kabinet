@@ -20,7 +20,7 @@ export async function handler(event){
     return { statusCode: 200, body: JSON.stringify({
       has_webhook_secret: !!WEBHOOK_SECRET,
       webhook_secret_len: (WEBHOOK_SECRET || '').length,
-      has_supabase_url: !!SUPABASE_URL,
+      supabase_url: SUPABASE_URL || null,
       has_service_key: !!SERVICE_KEY,
       service_key_len: (SERVICE_KEY || '').length
     }) }
