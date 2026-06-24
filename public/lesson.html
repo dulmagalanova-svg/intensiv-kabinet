@@ -119,8 +119,12 @@ async function loadLesson(){
     return
   }
 
+  // админ (Mrs) обходит замок для предпросмотра; ученики — нет
+  const { data: meProf } = await supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle()
+  const isAdmin = !!(meProf && meProf.is_admin)
+
   // урок ещё закрыт по дате — не показываем содержимое
-  if(lesson.unlock_at && new Date(lesson.unlock_at) > new Date()){
+  if(!isAdmin && lesson.unlock_at && new Date(lesson.unlock_at) > new Date()){
     const M = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']
     const d = new Date(lesson.unlock_at)
     box.innerHTML = `<div class="locked"><b>🔒 Урок ещё закрыт.</b><br>Откроется ${d.getDate()} ${M[d.getMonth()]}. Пока доступно предобучение — вернись к <a href="/lessons.html">списку уроков</a>.</div>`
