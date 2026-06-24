@@ -8,6 +8,9 @@
 <style>
   .lessons .sec{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9c7a00;margin:22px 4px 10px}
   .lessons .sec:first-of-type{margin-top:8px}
+  .lessons .lcard.locked{opacity:.62;cursor:default}
+  .lessons .lcard.locked .num{filter:grayscale(1)}
+  .lessons .lockd{font-size:13px;font-weight:700;color:#9c7a00;margin-top:2px}
 </style>
 </head>
 <body>
@@ -41,7 +44,7 @@ async function renderLessons(){
 
   // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
   const { data: lessons, error } = await supabase
-    .from('lessons').select('id,slug,title,day,sort').order('sort')
+    .from('lessons').select('id,slug,title,day,sort,unlock_at').order('sort')
 
   if(error){ list.innerHTML = `<div class="locked">Ошибка загрузки: ${error.message}</div>`; return }
 
@@ -61,7 +64,19 @@ async function renderLessons(){
   const { data: prog } = await supabase.from('progress').select('lesson_id,done')
   const doneSet = new Set((prog || []).filter(p => p.done).map(p => p.lesson_id))
 
-  const card = (l, badge) => `
+  const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']
+  const fmtDate = iso => { const d = new Date(iso); return d.getDate() + ' ' + MONTHS[d.getMonth()] }
+  const isLocked = l => l.unlock_at && new Date(l.unlock_at) > new Date()
+
+  const card = (l, badge) => isLocked(l) ? `
+    <div class="lcard locked">
+      <span class="num">🔒</span>
+      <span>
+        <div class="t">${l.title}</div>
+        <div class="lockd">Откроется ${fmtDate(l.unlock_at)}</div>
+      </span>
+      <span></span>
+    </div>` : `
     <a class="lcard" href="/lesson.html?id=${l.id}">
       <span class="num">${badge}</span>
       <span>
