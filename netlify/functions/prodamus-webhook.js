@@ -17,17 +17,6 @@ const SERVICE_KEY = process.env.SUPABASE_SECRET_KEY
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
 
 export async function handler(event){
-  // временная диагностика: видит ли функция env-переменные (значения НЕ раскрываем)
-  if((event.queryStringParameters || {}).debug === 'germiona2026'){
-    return { statusCode: 200, body: JSON.stringify({
-      has_webhook_secret: !!WEBHOOK_SECRET,
-      webhook_secret_len: (WEBHOOK_SECRET || '').length,
-      supabase_url: SUPABASE_URL || null,
-      has_service_key: !!SERVICE_KEY,
-      service_key_len: (SERVICE_KEY || '').length
-    }) }
-  }
-
   if(event.httpMethod !== 'POST') return { statusCode: 405, body: 'method not allowed' }
 
   // секрет-гейт
