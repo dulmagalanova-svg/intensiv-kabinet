@@ -121,13 +121,6 @@ async function loadLesson(){
     <h1 style="margin:20px 0 6px">${lesson.title}</h1>
     ${lesson.video_url ? `<div class="video"><iframe src="${lesson.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : `<div class="video video-empty">Видео урока появится здесь</div>`}
     <div class="lesson-body">${lesson.body_html || ''}</div>
-    <div class="hw">
-      <h3>Домашнее задание</h3>
-      <p style="font-size:14.5px;color:#4a463d">Загрузи файл с результатом — мы проверим.</p>
-      <input type="file" id="hwFile">
-      <button class="btn" id="hwSend" style="max-width:240px">Сдать домашку</button>
-      <div class="msg" id="hwMsg"></div>
-    </div>
     <div class="actions">
       <button class="btn" id="doneBtn" style="max-width:260px">${done ? 'Пройдено ✓' : 'Отметить пройденным'}</button>
       <a class="back" href="/lessons.html">← ко всем урокам</a>
@@ -136,9 +129,9 @@ async function loadLesson(){
 
   enhanceCopy()
   wireDone(done)
-  wireHomework()
 }
 
+// Кнопка «Копировать» на каждый блок команды (<pre> внутри урока).
 function enhanceCopy(){
   document.querySelectorAll('.lesson-body pre').forEach(pre => {
     const wrap = document.createElement('div')
@@ -173,29 +166,6 @@ function wireDone(done){
   }
 }
 
-function wireHomework(){
-  const send = document.getElementById('hwSend')
-  const fileInput = document.getElementById('hwFile')
-  const msg = document.getElementById('hwMsg')
-  send.onclick = async () => {
-    const file = fileInput.files[0]
-    if(!file){ showHw('Выбери файл.', false); return }
-    send.disabled = true
-    const path = `${user.id}/${lessonId}-${Date.now()}-${file.name}`
-    const up = await supabase.storage.from('homework').upload(path, file)
-    if(up.error){ showHw('Не удалось загрузить: ' + up.error.message, false); send.disabled = false; return }
-    const ins = await supabase.from('homework')
-      .insert({ user_id: user.id, lesson_id: lessonId, file_path: path })
-    send.disabled = false
-    if(ins.error){ showHw('Файл загружен, но запись не создана: ' + ins.error.message, false); return }
-    showHw('Домашка отправлена. Спасибо!', true)
-    fileInput.value = ''
-  }
-  function showHw(text, ok){
-    msg.textContent = text
-    msg.className = 'msg show ' + (ok ? 'ok' : 'err')
-  }
-}
 </script>
 </body>
 </html>
