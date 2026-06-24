@@ -10,7 +10,9 @@
 //   SUPABASE_SECRET_KEY   — sb_secret_... (service-role, обходит RLS; ТОЛЬКО на сервере)
 //   WEBHOOK_SECRET        — длинная случайная строка, она же в URL уведомления Продамуса
 
-const SUPABASE_URL = process.env.SUPABASE_URL
+// нормализуем: убираем хвостовые слэши и случайный суффикс /rest/v1, чтобы
+// SUPABASE_URL был чистым origin (иначе при склейке выходит двойной /rest/v1)
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '')
 const SERVICE_KEY = process.env.SUPABASE_SECRET_KEY
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
 
