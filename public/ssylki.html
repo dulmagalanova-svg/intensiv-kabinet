@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ссылки и ресурсы — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .res{padding:18px 0 8px}
+  .res h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9c7a00;margin:22px 4px 8px}
+  .rcard{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0;background:#fff}
+  .rcard .rt{font-weight:800;font-size:17px;color:var(--ink)}
+  .rcard .rd{font-size:15px;color:#2a2620;margin:6px 0 10px}
+  .rbtn{display:inline-block;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:14.5px;text-decoration:none;border-radius:10px;padding:9px 16px}
+  .cmd{position:relative;margin:12px 0 2px}
+  .cmd pre{background:#161310;color:#f3e9cf;border-radius:12px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+  .cmd .cb{position:absolute;top:8px;right:8px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;border:none;border-radius:8px;padding:5px 11px;font-weight:800;font-size:12px;cursor:pointer}
+  .cmd .cb.done{background:var(--green);color:#fff}
+  .note{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:14.5px;color:#4a463d;margin:12px 0}
+</style>
+</head>
+<body>
+
+<div id="nav"></div>
+
+<main class="wrap">
+  <h2 style="margin-bottom:4px">Ссылки и ресурсы</h2>
+  <p class="lead">Всё, что нужно скачать и установить для интенсива — в одном месте.</p>
+
+  <div class="res">
+
+    <h3>Заготовка агента</h3>
+    <div class="rcard">
+      <div class="rt">Стартовый репозиторий — intensiv-starter</div>
+      <div class="rd">Готовая папка агента: плагин связи с Telegram, шаблон личности CLAUDE.md, вся структура. Из неё ты клонируешь агента в Уроке 1 — одной командой.</div>
+      <a class="rbtn" href="https://github.com/dulmagalanova-svg/intensiv-starter" target="_blank" rel="noopener">Открыть на GitHub →</a>
+      <div class="cmd"><pre>git clone https://github.com/dulmagalanova-svg/intensiv-starter</pre></div>
+    </div>
+
+    <h3>Программы для установки</h3>
+    <div class="rcard">
+      <div class="rt">VS Code — редактор + терминал</div>
+      <div class="rd">Бесплатный редактор, где удобно держать файлы агента и встроенный терминал.</div>
+      <a class="rbtn" href="https://code.visualstudio.com/" target="_blank" rel="noopener">code.visualstudio.com →</a>
+    </div>
+    <div class="rcard">
+      <div class="rt">Node.js — платформа (ставить первой)</div>
+      <div class="rd">Скачай версию LTS. Без неё не установится Claude Code.</div>
+      <a class="rbtn" href="https://nodejs.org/" target="_blank" rel="noopener">nodejs.org →</a>
+    </div>
+    <div class="rcard">
+      <div class="rt">Claude Code — «тело» агента</div>
+      <div class="rd">Ставится одной командой в терминале (после Node.js):</div>
+      <div class="cmd"><pre>npm install -g @anthropic-ai/claude-code</pre></div>
+    </div>
+    <div class="rcard">
+      <div class="rt">bun — движок плагина</div>
+      <div class="rd">Нужен, чтобы агент-заготовка запустилась. Команда установки:</div>
+      <div class="cmd"><pre>curl -fsSL https://bun.sh/install | bash</pre></div>
+    </div>
+
+    <h3>Аккаунты</h3>
+    <div class="rcard">
+      <div class="rt">Claude — подписка (мозг агента)</div>
+      <div class="rd">Оформи Pro или Max. Для РФ — с VPN.</div>
+      <a class="rbtn" href="https://claude.ai/" target="_blank" rel="noopener">claude.ai →</a>
+    </div>
+    <div class="rcard">
+      <div class="rt">GitHub — бесплатный аккаунт</div>
+      <div class="rd">Нужен, чтобы хранить и скачивать репозиторий агента.</div>
+      <a class="rbtn" href="https://github.com/" target="_blank" rel="noopener">github.com →</a>
+    </div>
+
+    <h3>Скиллы (готовые умения агента)</h3>
+    <div class="note">Здесь появятся ссылки на готовые скиллы, которые ты скачиваешь и подключаешь агенту (контент, планирование, ревью и т.д.). Добавим на Уроке 3 — список конкретных скиллов под ниши.</div>
+
+  </div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { requireAuth } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
+const session = await requireAuth()
+if(session) renderNav('ssylki')
+
+// кнопки «Копировать» на команды
+document.querySelectorAll('.cmd').forEach(box => {
+  const pre = box.querySelector('pre')
+  const btn = document.createElement('button')
+  btn.className = 'cb'; btn.textContent = 'Копировать'
+  btn.onclick = async () => {
+    try { await navigator.clipboard.writeText(pre.innerText.trim())
+      btn.textContent = 'Скопировано ✓'; btn.classList.add('done')
+      setTimeout(() => { btn.textContent = 'Копировать'; btn.classList.remove('done') }, 1500)
+    } catch { btn.textContent = 'Выдели и скопируй' }
+  }
+  box.appendChild(btn)
+})
+</script>
+</body>
+</html>
