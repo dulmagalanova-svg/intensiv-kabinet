@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Словарь терминов — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .gloss{padding:18px 0 8px}
+  .gloss h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9c7a00;margin:22px 4px 8px}
+  .term{border:1.5px solid var(--line);border-radius:14px;padding:15px 17px;margin:11px 0;background:#fff}
+  .term .name{font-weight:800;font-size:17.5px;color:var(--ink)}
+  .term .tg{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--golddark);background:#fff3d4;border:1px solid #f0dca0;border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .term .what{margin:8px 0 4px;font-size:15px;color:#2a2620}
+  .term .why{font-size:14.5px;color:#5c564c;background:#f7f4ec;border-radius:8px;padding:8px 12px;margin-top:6px}
+  .term .why b{color:var(--blue)}
+  .term .ana{font-size:14px;color:#8a6a12;background:#fff8e8;border:1px solid #f0dca0;border-radius:8px;padding:7px 11px;margin-top:6px}
+  .term code{background:#f3efe3;padding:2px 6px;border-radius:6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+
+<div id="nav"></div>
+
+<main class="wrap">
+  <h2 style="margin-bottom:4px">Словарь терминов</h2>
+  <p class="lead">Все слова из уроков простыми словами: что значит и зачем. Держи под рукой — с ним уроки перестают казаться набором непонятных команд.</p>
+
+  <div class="gloss">
+
+    <h3>Главное</h3>
+
+    <div class="term">
+      <span class="name">AI-агент</span><span class="tg">основа</span>
+      <div class="what">Программа на основе AI, которая не просто отвечает, а САМ действует: пользуется инструментами, проверяет себя, помнит прошлое, доводит задачу до результата.</div>
+      <div class="why"><b>Зачем:</b> чтобы переложить на него рутину — он работает, ты занимаешься главным.</div>
+      <div class="ana">Аналогия: не «собеседник», а «сотрудник».</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Claude</span><span class="tg">AI</span>
+      <div class="what">Искусственный интеллект от компании Anthropic — «мозг», на котором мы строим агентов. Один из самых сильных в мире на 2026 год.</div>
+      <div class="why"><b>Зачем:</b> это интеллект, который думает за агента. Берём его как основу.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Claude Code</span><span class="tg">программа</span>
+      <div class="what">Программа от Anthropic, через которую агент «живёт» на компьютере. Работает в терминале. На ней мы строим агентов.</div>
+      <div class="why"><b>Зачем:</b> это «тело» агента — то, что выполняет команды и держит его запущенным.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Модель (Opus / Sonnet / Haiku)</span><span class="tg">мозг</span>
+      <div class="what">«Мозг» агента — то, что думает. Внутри Claude их три по силе: Opus (сильная, для сложного), Sonnet (средняя, повседневная), Haiku (простая, мелочи).</div>
+      <div class="why"><b>Зачем:</b> под задачу берёшь нужную силу. Начинаем с сильной (Opus).</div>
+    </div>
+
+    <h3>Установка и работа</h3>
+
+    <div class="term">
+      <span class="name">Терминал</span><span class="tg">инструмент</span>
+      <div class="what">Чёрное окно, куда команды вводят текстом, а не кнопками. Бывает отдельной программой («Терминал» на Mac) или встроенным в VS Code — это одно и то же.</div>
+      <div class="why"><b>Зачем:</b> через него ставят и запускают программы. Мы просто вставляем готовые команды и жмём Enter.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">VS Code</span><span class="tg">редактор</span>
+      <div class="what">Бесплатная программа-редактор, где удобно открывать файлы агента и встроенный терминал — всё в одном окне.</div>
+      <div class="why"><b>Зачем:</b> чтобы править файлы агента (личность, настройки) и запускать Claude Code.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Node.js</span><span class="tg">платформа</span>
+      <div class="what">Платформа, на которой запускается Claude Code. Ставится «внутрь системы», иконки нет, работает в фоне.</div>
+      <div class="why"><b>Зачем:</b> без неё Claude Code не установится и не запустится. Ставим первой.</div>
+      <div class="ana">Аналогия: Claude Code — игра, Node.js — приставка, на которой она работает.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">npm</span><span class="tg">установщик</span>
+      <div class="what">«Установщик» программ, который приходит вместе с Node.js. Команда <code>npm install</code> = «установи мне вот это».</div>
+      <div class="why"><b>Зачем:</b> через него ставим Claude Code и дополнения.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">bun</span><span class="tg">движок</span>
+      <div class="what">Быстрый движок, на котором работает плагин связи агента с Telegram. Ставится одной командой.</div>
+      <div class="why"><b>Зачем:</b> без bun агент-заготовка не запустится. Ставим его в Уроке 1.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Подписка (Claude Pro / Max)</span><span class="tg">доступ</span>
+      <div class="what">Платный доступ к модели-мозгу. Pro — $20/мес (попробовать), Max — $100/мес (для работы).</div>
+      <div class="why"><b>Зачем:</b> без подписки агенту «нечем думать», он не запустится.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">VPN</span><span class="tg">для РФ</span>
+      <div class="what">Программа, которая открывает доступ к заблокированным сайтам. Для России — нужна, чтобы открыть и оплатить Claude.</div>
+      <div class="why"><b>Зачем:</b> сайт Claude из РФ напрямую не открывается.</div>
+    </div>
+
+    <h3>Личность, навыки, память</h3>
+
+    <div class="term">
+      <span class="name">CLAUDE.md</span><span class="tg">личность</span>
+      <div class="what">Файл-инструкция в папке агента — его «паспорт характера»: имя, как обращаться к тебе, тон, правила. Агент читает его при каждом запуске.</div>
+      <div class="why"><b>Зачем:</b> чтобы агент звучал как ты задала, а не как безликий робот. Уже лежит в скачанной заготовке — ты его заполняешь, не пишешь с нуля.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">USER.md</span><span class="tg">о тебе</span>
+      <div class="what">Файл с информацией о тебе (владельце): имя, чем занимаешься, предпочтения. Лежит рядом с CLAUDE.md.</div>
+      <div class="why"><b>Зачем:</b> чтобы агент знал, кто ты, и отвечал под тебя, а не шаблонно.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Скилл (skill)</span><span class="tg">умение</span>
+      <div class="what">Готовое умение агента: «писать посты», «планировать», «делать ревью». Папка с инструкцией, которую агент подхватывает по ключевым словам.</div>
+      <div class="why"><b>Зачем:</b> добавляешь агенту конкретные навыки как кирпичики.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Память (memory)</span><span class="tg">контекст</span>
+      <div class="what">Способность агента помнить прошлые разговоры — что было вчера, неделю назад. Включается одной настройкой.</div>
+      <div class="why"><b>Зачем:</b> чтобы не начинать каждый раз с чистого листа.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">MCP</span><span class="tg">подключение</span>
+      <div class="what">Стандарт, по которому агент подключается к внешним сервисам (календарь, почта, базы знаний). «Розетка» для подключения умений.</div>
+      <div class="why"><b>Зачем:</b> через MCP агент получает руки — может реально что-то делать в других сервисах.</div>
+    </div>
+
+    <h3>Хранение и каналы</h3>
+
+    <div class="term">
+      <span class="name">git</span><span class="tg">история</span>
+      <div class="what">Система, которая хранит историю изменений твоих файлов на компьютере (как «версии» документа).</div>
+      <div class="why"><b>Зачем:</b> можно вернуться к любой прошлой версии, ничего не теряется.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">GitHub</span><span class="tg">облако</span>
+      <div class="what">Бесплатный сайт, куда выкладывают папку с проектом (репозиторий), чтобы она хранилась в облаке.</div>
+      <div class="why"><b>Зачем:</b> это «дом» агента в облаке — оттуда его скачивают и туда сохраняют.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Репозиторий</span><span class="tg">папка</span>
+      <div class="what">Папка проекта с историей изменений. Лежит на GitHub. Заготовку агента ты клонируешь (скачиваешь) именно из репозитория.</div>
+      <div class="why"><b>Зачем:</b> это и есть «дом» агента — внутри плагин, личность, настройки.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">clone (клонировать)</span><span class="tg">скачать</span>
+      <div class="what">Команда <code>git clone</code> — «скачай мне эту папку-репозиторий с GitHub к себе на компьютер».</div>
+      <div class="why"><b>Зачем:</b> так ты получаешь готовую заготовку агента одной командой.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">BotFather</span><span class="tg">Telegram</span>
+      <div class="what">Официальный бот Telegram, который создаёт ботов. Пишешь ему <code>/newbot</code> — он делает бота и даёт токен.</div>
+      <div class="why"><b>Зачем:</b> через него рождается твой Telegram-бот, лицо агента.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Токен бота</span><span class="tg">ключ</span>
+      <div class="what">Длинная секретная строка, которую даёт @BotFather при создании бота. Ключ от твоего Telegram-бота.</div>
+      <div class="why"><b>Зачем:</b> связывает агента с твоим ботом. Никому не показывай — это как пароль.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">Канал (Telegram)</span><span class="tg">связь</span>
+      <div class="what">Место, через которое агент принимает и шлёт сообщения. У нас базовый канал — Telegram-бот.</div>
+      <div class="why"><b>Зачем:</b> чтобы ты общалась с агентом обычными сообщениями в телефоне.</div>
+    </div>
+
+    <h3>Автономия и сервер</h3>
+
+    <div class="term">
+      <span class="name">Разрешения (permissions) / Bypass</span><span class="tg">автономия</span>
+      <div class="what">Claude Code по умолчанию спрашивает разрешение на каждое действие. Режимы: спрашивать всё / молча править / всё молча (bypass). Опасное (удаление, отправка денег) держат под запросом всегда.</div>
+      <div class="why"><b>Зачем:</b> чтобы агент работал сам, не дёргая тебя на каждую мелочь — но с защитой от опасного.</div>
+    </div>
+
+    <div class="term">
+      <span class="name">VPS / сервер</span><span class="tg">24/7</span>
+      <div class="what">Арендованный компьютер в интернете (~$5/мес), который никогда не выключается.</div>
+      <div class="why"><b>Зачем:</b> чтобы агент работал круглосуточно, не завися от твоего ноутбука. На старте не нужен — хватит своего компьютера.</div>
+    </div>
+
+  </div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { requireAuth } from '/js/auth.js'
+import { renderNav } from '/js/nav.js'
+const session = await requireAuth()
+if(session) renderNav('slovar')
+</script>
+</body>
+</html>
