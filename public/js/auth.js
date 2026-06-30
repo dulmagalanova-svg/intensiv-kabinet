@@ -14,6 +14,19 @@ export async function signOut(){
   location.href = '/index.html'
 }
 
+// Отправить письмо со ссылкой для сброса пароля. Ссылка ведёт на /reset.html.
+export async function resetPassword(email){
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: location.origin + '/reset.html'
+  })
+}
+
+// Установить новый пароль. Работает на /reset.html после перехода по ссылке из
+// письма (Supabase поднимает временную recovery-сессию из токена в URL).
+export async function updatePassword(password){
+  return supabase.auth.updateUser({ password })
+}
+
 // Вызывать в начале закрытых страниц. Нет сессии → на лендинг.
 export async function requireAuth(){
   const { data } = await supabase.auth.getSession()
