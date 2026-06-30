@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Новый пароль — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="avatar" src="/dulma.jpg%20.png" alt="Dulma">
+    <div class="kick">Интенсив · AI-команда на Claude</div>
+    <h1>Новый пароль</h1>
+    <p>Придумай новый пароль для входа в кабинет.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <h2>Сброс пароля</h2>
+    <div class="sub" id="status">Проверяю ссылку из письма…</div>
+
+    <form id="resetForm" style="display:none">
+      <label for="password">Новый пароль</label>
+      <input id="password" type="password" autocomplete="new-password" placeholder="минимум 6 символов" minlength="6" required>
+
+      <button class="btn" id="submitBtn" type="submit">Сохранить пароль</button>
+    </form>
+
+    <div class="msg" id="msg"></div>
+    <div id="backWrap" style="display:none;margin-top:14px">
+      <a href="/index.html">← Вернуться ко входу</a>
+    </div>
+  </div>
+</main>
+
+<footer>Интенсив «AI-команда на Claude» · кабинет</footer>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { updatePassword } from '/js/auth.js'
+
+const statusEl = document.getElementById('status')
+const form = document.getElementById('resetForm')
+const submitBtn = document.getElementById('submitBtn')
+const msg = document.getElementById('msg')
+const backWrap = document.getElementById('backWrap')
+
+function showMsg(text, ok){ msg.textContent = text; msg.className = 'msg show ' + (ok ? 'ok' : 'err') }
+
+let recoveryReady = false
+function enableForm(){
+  if(recoveryReady) return
+  recoveryReady = true
+  statusEl.textContent = 'Ссылка подтверждена. Задай новый пароль ниже.'
+  form.style.display = ''
+}
+function linkInvalid(){
+  if(recoveryReady) return
+  statusEl.textContent = 'Ссылка недействительна или истекла.'
+  backWrap.style.display = ''
+  showMsg('Запроси сброс пароля заново на странице входа («Забыли пароль?»).', false)
+}
+
+// Supabase сам поднимает recovery-сессию из токена в URL (detectSessionInUrl).
+supabase.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY' || session) enableForm()
+})
+// Фолбэк: токен мог обработаться до подписки.
+supabase.auth.getSession().then(({ data }) => {
+  if(data.session) enableForm()
+  else setTimeout(() => { if(!recoveryReady) linkInvalid() }, 2500)
+})
+
+form.onsubmit = async (e) => {
+  e.preventDefault()
+  submitBtn.disabled = true
+  msg.className = 'msg'
+  try {
+    const { error } = await updatePassword(document.getElementById('password').value)
+    if(error) throw error
+    form.style.display = 'none'
+    statusEl.textContent = 'Готово!'
+    showMsg('Пароль изменён. Сейчас перенаправлю на вход…', true)
+    setTimeout(() => { location.href = '/index.html' }, 2000)
+  } catch(err){
+    const m = err.message || ''
+    if(/Auth session missing|session/i.test(m)) showMsg('Ссылка истекла. Запроси сброс заново на странице входа.', false)
+    else if(/at least/i.test(m)) showMsg('Пароль слишком короткий (минимум 6 символов).', false)
+    else showMsg(m, false)
+  } finally {
+    submitBtn.disabled = false
+  }
+}
+</script>
+</body>
+</html>
