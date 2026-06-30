@@ -37,6 +37,8 @@
       <button class="btn" id="submitBtn" type="submit">Войти</button>
     </form>
 
+    <button type="button" id="forgotLink" style="background:none;border:none;color:#2563eb;font-size:14px;cursor:pointer;margin-top:12px;text-decoration:underline;padding:4px 0">Забыли пароль?</button>
+
     <div class="msg" id="msg"></div>
   </div>
 </main>
@@ -44,11 +46,12 @@
 <footer>Интенсив «AI-команда на Claude» · кабинет</footer>
 
 <script type="module">
-import { signUp, signIn, currentUser } from '/js/auth.js'
+import { signUp, signIn, currentUser, resetPassword } from '/js/auth.js'
 
+// Уже вошёл — сразу на уроки.
 currentUser().then(u => { if(u) location.href = '/glavnaya.html' })
 
-let mode = 'login'
+let mode = 'login' // 'login' | 'signup'
 const tabLogin = document.getElementById('tab-login')
 const tabSignup = document.getElementById('tab-signup')
 const title = document.getElementById('formTitle')
@@ -56,6 +59,7 @@ const sub = document.getElementById('formSub')
 const submitBtn = document.getElementById('submitBtn')
 const pw = document.getElementById('password')
 const msg = document.getElementById('msg')
+const forgotLink = document.getElementById('forgotLink')
 
 function setMode(m){
   mode = m
@@ -66,10 +70,28 @@ function setMode(m){
   sub.textContent = login ? 'Введи почту и пароль.' : 'Зарегистрируйся по почте — это бесплатно.'
   submitBtn.textContent = login ? 'Войти' : 'Зарегистрироваться'
   pw.setAttribute('autocomplete', login ? 'current-password' : 'new-password')
+  forgotLink.style.display = login ? '' : 'none'
   hideMsg()
 }
 tabLogin.onclick = () => setMode('login')
 tabSignup.onclick = () => setMode('signup')
+
+// «Забыли пароль?» — шлём письмо со ссылкой на /reset.html.
+forgotLink.onclick = async () => {
+  hideMsg()
+  const email = document.getElementById('email').value.trim()
+  if(!email){ showMsg('Сначала введи свою почту в поле выше — пришлю на неё ссылку для сброса.', false); return }
+  forgotLink.disabled = true
+  try {
+    const { error } = await resetPassword(email)
+    if(error) throw error
+    showMsg('Письмо со ссылкой для сброса отправлено на ' + email + '. Открой его и задай новый пароль. Проверь и папку «Спам».', true)
+  } catch(err){
+    showMsg(translateError(err.message), false)
+  } finally {
+    forgotLink.disabled = false
+  }
+}
 
 function showMsg(text, ok){
   msg.textContent = text
