@@ -82,6 +82,16 @@
   /* подвал действий */
   .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:24px 0 10px}
   .back{color:var(--golddark);font-weight:700;text-decoration:none}
+  /* навигация между уроками ← / → */
+  .lesson-nav{display:flex;justify-content:space-between;gap:12px;margin:6px 0 26px}
+  .lesson-nav a{flex:1;display:flex;align-items:center;gap:10px;text-decoration:none;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;color:#2a2620;background:#fffdf8;transition:border-color .15s}
+  .lesson-nav a:hover{border-color:var(--gold)}
+  .lesson-nav a.next{justify-content:flex-end;text-align:right}
+  .lesson-nav a .dir{color:var(--golddark);font-size:20px;font-weight:800;flex:0 0 auto}
+  .lesson-nav a .lab{font-size:11px;color:#8a8272;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:1px}
+  .lesson-nav a .ttl{font-size:14.5px;font-weight:700}
+  .lesson-nav .spacer{flex:1}
+  @media(max-width:560px){.lesson-nav a .ttl{display:none}}
 </style>
 </head>
 <body>
@@ -147,6 +157,21 @@ async function loadLesson(){
     .from('progress').select('done').eq('lesson_id', lessonId).maybeSingle()
   const done = !!(prog && prog.done)
 
+  // соседние уроки для стрелок ← / → (порядок как в списке: day, затем sort)
+  const { data: allLessons } = await supabase
+    .from('lessons').select('id,title').order('day', { ascending: true }).order('sort', { ascending: true })
+  let prev = null, next = null
+  if(Array.isArray(allLessons)){
+    const idx = allLessons.findIndex(l => l.id === lessonId)
+    if(idx > 0) prev = allLessons[idx - 1]
+    if(idx >= 0 && idx < allLessons.length - 1) next = allLessons[idx + 1]
+  }
+  const navHtml = `
+    <div class="lesson-nav">
+      ${prev ? `<a class="prev" href="/lesson.html?id=${prev.id}"><span class="dir">←</span><span><span class="lab">Предыдущий</span><span class="ttl">${prev.title}</span></span></a>` : `<span class="spacer"></span>`}
+      ${next ? `<a class="next" href="/lesson.html?id=${next.id}"><span><span class="lab">Следующий</span><span class="ttl">${next.title}</span></span><span class="dir">→</span></a>` : `<span class="spacer"></span>`}
+    </div>`
+
   box.innerHTML = `
     <h1 style="margin:20px 0 6px">${lesson.title}</h1>
     ${lesson.video_url ? `<div class="video"><iframe src="${lesson.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ``}
@@ -155,6 +180,7 @@ async function loadLesson(){
       <button class="btn" id="doneBtn" style="max-width:260px">${done ? 'Пройдено ✓' : 'Отметить пройденным'}</button>
       <a class="back" href="/lessons.html">← ко всем урокам</a>
     </div>
+    ${navHtml}
   `
 
   enhanceCopy()
