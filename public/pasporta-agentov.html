@@ -57,6 +57,7 @@
   .repos li{margin:7px 0}
   footer{margin-top:52px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:14px}
   .accent{color:var(--accent)}
+  body{visibility:hidden}
 </style>
 </head>
 <body>
@@ -265,5 +266,10 @@
 </footer>
 
 </div>
+<script type="module">
+  // Гейт доступа: нет сессии — редирект на вход; есть — показываем контент.
+  import { requireAuth } from '/js/auth.js'
+  requireAuth().then(function(session){ if(session) document.body.style.visibility = 'visible' })
+</script>
 </body>
 </html>
