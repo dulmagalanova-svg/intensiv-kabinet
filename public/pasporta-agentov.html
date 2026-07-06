@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Паспорта агентов команды + gbrain</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#171b22; --card2:#1e232c; --ink:#e6e9ef; --muted:#9aa4b2;
+    --accent:#f5c542; --blue:#5aa9ff; --green:#4ade80; --pink:#f472b6; --line:#2a3038;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;font-size:17px}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  header{text-align:center;padding:40px 20px 26px;border-bottom:1px solid var(--line);margin-bottom:30px}
+  header .badge{display:inline-block;background:var(--accent);color:#111;font-weight:700;
+    padding:4px 14px;border-radius:999px;font-size:14px;letter-spacing:.5px;margin-bottom:16px}
+  h1{font-size:34px;margin:0 0 10px;line-height:1.15}
+  header p{color:var(--muted);font-size:18px;margin:0}
+  h2{font-size:24px;margin:44px 0 6px;display:flex;align-items:center;gap:10px}
+  h2 .n{background:var(--blue);color:#08111f;width:34px;height:34px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex:0 0 auto}
+  h3{font-size:17px;margin:14px 0 4px;color:var(--accent)}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .lead{font-size:18px;text-align:center;max-width:740px;margin:0 auto 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0}
+  ul{margin:6px 0;padding-left:22px}
+  li{margin:4px 0}
+  .tag{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:8px;
+    padding:4px 11px;font-size:13.5px;margin:3px 4px 3px 0}
+  .tag.s{border-color:#2f4a5d;color:var(--blue)}
+  .tag.k{border-color:#5d4a2f;color:var(--accent)}
+  a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px solid #2f4a5d}
+  a:hover{border-color:var(--blue)}
+  /* паспорт агента */
+  .agent{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0;margin:16px 0;overflow:hidden}
+  .agent .top{display:flex;align-items:center;gap:14px;padding:16px 20px;background:linear-gradient(120deg,#1c2029,#14171d);border-bottom:1px solid var(--line)}
+  .agent .top .em{font-size:32px;flex:0 0 auto}
+  .agent .top .nm{font-size:21px;font-weight:800}
+  .agent .top .rl{font-size:13.5px;color:var(--muted)}
+  .agent .top .mdl{margin-left:auto;font-size:12px;font-weight:800;color:var(--accent);background:#2a2410;border:1px solid #5d4a2f;border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .agent .body{padding:16px 20px}
+  .agent .body .lab{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 5px}
+  .agent .body .lab:first-child{margin-top:0}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+  .flow .box{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px}
+  .flow .arr{color:var(--accent);font-weight:800}
+  .note{background:#1a1710;border:1px solid #4a3d1a;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:15px}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14.5px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--card2);font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  td:first-child{font-weight:700;white-space:nowrap}
+  .step{display:flex;gap:14px;margin:10px 0;align-items:flex-start}
+  .step .num{background:var(--accent);color:#111;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;font-size:14px}
+  .repos li{margin:7px 0}
+  footer{margin-top:52px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:14px}
+  .accent{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">КОМАНДА AI-АГЕНТОВ</span>
+  <h1>Паспорта агентов + система памяти gbrain</h1>
+  <p>Из чего собран каждый агент, чем подключён, какие скиллы — и как собрать себе такой же рой</p>
+</header>
+
+<p class="lead">Наша команда — это <span class="accent">рой</span> из Claude Code агентов на одном сервере: общая память (gbrain), общий вход через Telegram, у каждого — своя роль, свой бот и свои инструменты. Принцип роя: <b>build · remember · grow</b> (строить · помнить · расти).</p>
+
+<h2><span class="n">1</span>Паспорта агентов</h2>
+<p class="sub">Четыре агента одной архитектуры, разные роли. Разница — в личности (CLAUDE.md), наборе сервисов (MCP) и навыков.</p>
+
+<!-- GERMIONA -->
+<div class="agent">
+  <div class="top">
+    <span class="em">💻</span>
+    <span><span class="nm">Germiona</span><br><span class="rl">кодер · архитектор · код-ревьюер · хранитель инфраструктуры</span></span>
+    <span class="mdl">Claude Opus 4.8 · 1M контекст</span>
+  </div>
+  <div class="body">
+    <div class="lab">Что делает</div>
+    Технический агент команды. Пишет код на Python / TypeScript / bash, проектирует архитектуру, делает код-ревью, чинит баги по логам (ищет причину, а не заглушку), ведёт деплой local → staging → prod. Хранитель инфраструктуры: следит, чтобы каналы агентов работали, и чинит сбои.
+    <div class="lab">Ключевые задачи</div>
+    <ul>
+      <li>Написать / отрефакторить код и скрипты</li>
+      <li>Ревью и деплой изменений</li>
+      <li>Диагностировать и починить баг автономно</li>
+      <li>Хранить error-паттерны и рунбуки в общей памяти</li>
+    </ul>
+    <div class="lab">Мозг</div>
+    Claude Opus 4.8, контекст 1M токенов — самая мощная модель: код и архитектура требуют глубины. Своя долгая память + общий мозг gbrain.
+    <div class="lab">Подключённые сервисы (MCP)</div>
+    <span class="tag s">dashi-channel · Telegram</span>
+    <span class="tag s">gbrain-memory</span>
+    <span class="tag s">gbrain-recall</span>
+    <span class="tag s">gbrain-swarm</span>
+    <span class="tag s">github</span>
+    <span class="tag s">WebFetch / WebSearch</span>
+    <div class="lab">Ключевые навыки — ссылки на источник</div>
+    <ul class="repos">
+      <li><a href="https://github.com/obra/superpowers" target="_blank">test-driven-development</a> — тесты пишутся до кода <span style="color:var(--muted);font-size:12.5px">· superpowers</span></li>
+      <li><a href="https://github.com/obra/superpowers" target="_blank">verification-before-completion</a> — проверка результата перед «готово» <span style="color:var(--muted);font-size:12.5px">· superpowers</span></li>
+      <li><a href="https://github.com/obra/superpowers" target="_blank">systematic-debugging</a> — отладка по методу, а не наугад <span style="color:var(--muted);font-size:12.5px">· superpowers</span></li>
+      <li><a href="https://github.com/addyosmani/agent-skills" target="_blank">spec-driven-development</a> — сначала спецификация, потом код <span style="color:var(--muted);font-size:12.5px">· addyosmani/agent-skills</span></li>
+      <li><a href="https://github.com/addyosmani/agent-skills" target="_blank">context-engineering</a> — управление контекстом агента <span style="color:var(--muted);font-size:12.5px">· addyosmani/agent-skills</span></li>
+      <li><a href="https://github.com/qwwiwi/agentos-skills" target="_blank">senior-brainstorm</a> — архитектор-сеньор для выбора решений <span style="color:var(--muted);font-size:12.5px">· agentos-skills</span></li>
+      <li><a href="https://github.com/anthropics/skills" target="_blank">mcp-builder</a> — генератор MCP-серверов <span style="color:var(--muted);font-size:12.5px">· anthropics/skills</span></li>
+      <li><a href="https://github.com/DietrichGebert/ponytail" target="_blank">ponytail</a> — минимальный чистый код <span style="color:var(--muted);font-size:12.5px">· DietrichGebert</span></li>
+      <li>server-doctor — диагностика и лечение каналов агентов <span style="color:var(--muted);font-size:12.5px">· наша разработка</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- HORMOZI -->
+<div class="agent">
+  <div class="top">
+    <span class="em">📣</span>
+    <span><span class="nm">Hormozi</span><br><span class="rl">маркетолог · контент-движок · офферы и лидогенерация</span></span>
+    <span class="mdl">Claude Sonnet</span>
+  </div>
+  <div class="body">
+    <div class="lab">Что делает</div>
+    Маркетинговый агент. Пишет контент (посты, Reels-сценарии, hooks, заголовки), упаковывает офферы и продукты, строит воронки продаж, анализирует продажи и ведёт аудиторию в Telegram и Instagram.
+    <div class="lab">Ключевые задачи</div>
+    <ul>
+      <li>Идеи и тексты для постов, Reels, каруселей</li>
+      <li>Упаковка оффера и лид-магнитов</li>
+      <li>Воронки и аналитика продаж (Chatplace)</li>
+      <li>Работа с голосом бренда (tone of voice)</li>
+    </ul>
+    <div class="lab">Мозг</div>
+    Claude Sonnet — быстрый и экономичный, подходит для потока контента. Своя память по бренду и голосу.
+    <div class="lab">Подключённые сервисы (MCP)</div>
+    <span class="tag s">dashi-channel · Telegram</span>
+    <span class="tag s">gbrain-memory</span>
+    <span class="tag s">gbrain-recall</span>
+    <span class="tag s">gbrain-swarm</span>
+    <span class="tag s">Chatplace · продажи/боты (коннектор claude.ai)</span>
+    <div class="lab">Ключевые навыки — ссылки на источник</div>
+    <ul class="repos">
+      <li><a href="https://github.com/obra/superpowers" target="_blank">superpowers</a> — методология (планирование, ревью) <span style="color:var(--muted);font-size:12.5px">· obra</span></li>
+      <li><a href="https://github.com/msitarzewski/agency-agents" target="_blank">offer / lead-gen</a> — сборка офферов и лид-магнитов <span style="color:var(--muted);font-size:12.5px">· адаптация фреймворка из agency-agents</span></li>
+      <li><a href="https://github.com/pbakaus/impeccable" target="_blank">impeccable</a> — дизайн лендингов без «AI-слопа» <span style="color:var(--muted);font-size:12.5px">· pbakaus</span></li>
+      <li>content-engine · carousel-design · reels · landing-copy · yt-research — прикладные скиллы контента <span style="color:var(--muted);font-size:12.5px">· наша адаптация под наши каналы</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- WARREN -->
+<div class="agent">
+  <div class="top">
+    <span class="em">💰</span>
+    <span><span class="nm">Warren</span><br><span class="rl">финансист · P&L · unit-экономика · прогноз выручки</span></span>
+    <span class="mdl">Claude Sonnet</span>
+  </div>
+  <div class="body">
+    <div class="lab">Что делает</div>
+    Финансовый агент. Считает доходы и расходы, unit-экономику клуба и интенсива, строит прогноз выручки (обратный расчёт: сколько охвата нужно под цель по деньгам). Читает чеки из почты и сводит бюджет.
+    <div class="lab">Ключевые задачи</div>
+    <ul>
+      <li>P&L: доходы / расходы по факту</li>
+      <li>Unit-экономика продуктов</li>
+      <li>Прогноз выручки под цель</li>
+      <li>Расходы по чекам из Gmail (только чтение)</li>
+    </ul>
+    <div class="lab">Мозг</div>
+    Claude Sonnet. Почту Mrs читает в режиме только-чтение (отправлять не может). Данные воронки берёт из общей памяти — их туда пишет Hormozi.
+    <div class="lab">Подключённые сервисы (MCP)</div>
+    <span class="tag s">dashi-channel · Telegram</span>
+    <span class="tag s">gbrain-memory</span>
+    <span class="tag s">gbrain-recall</span>
+    <span class="tag s">gbrain-swarm</span>
+    <span class="tag s">gmail · read-only (почта Mrs)</span>
+    <span class="tag s">github</span>
+    <div class="lab">Ключевые навыки — ссылки на источник</div>
+    <ul class="repos">
+      <li><a href="https://github.com/obra/superpowers" target="_blank">verification-before-completion</a> — цифры проверяются перед выводом <span style="color:var(--muted);font-size:12.5px">· superpowers</span></li>
+      <li><a href="https://github.com/qwwiwi/agentos-skills" target="_blank">senior-brainstorm</a> — разбор финансовых сценариев <span style="color:var(--muted);font-size:12.5px">· agentos-skills</span></li>
+      <li><a href="https://github.com/addyosmani/agent-skills" target="_blank">context-engineering</a> — управление контекстом <span style="color:var(--muted);font-size:12.5px">· addyosmani/agent-skills</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- LUNA -->
+<div class="agent">
+  <div class="top">
+    <span class="em">🎓</span>
+    <span><span class="nm">Luna</span><br><span class="rl">куратор интенсива · поддержка учеников в чате 24/7</span></span>
+    <span class="mdl">Claude Sonnet · multichat</span>
+  </div>
+  <div class="body">
+    <div class="lab">Что делает</div>
+    Куратор интенсива. Отвечает ученикам в общем чате интенсива в Telegram — автономно, круглосуточно. Разбирает вопросы по урокам, помогает с настройкой агентов, поддерживает. В отличие от остальных (они общаются один-на-один с Mrs), Luna работает в ГРУППЕ и отвечает всем участникам.
+    <div class="lab">Ключевые задачи</div>
+    <ul>
+      <li>Отвечать на вопросы учеников по урокам</li>
+      <li>Помогать с настройкой и ошибками</li>
+      <li>Держать чат живым, не терять участников</li>
+    </ul>
+    <div class="lab">Мозг / как устроена</div>
+    Claude Sonnet в режиме <b>multichat</b>: под каждую ветку/участника поднимается своя сессия, поэтому Luna параллельно ведёт много диалогов и не путает людей. Настроена отвечать всем участникам группы (обычные агенты отвечают только владельцу). Читает общую память команды, чтобы отвечать согласованно.
+    <div class="lab">Подключённые сервисы (MCP)</div>
+    <span class="tag s">dashi-channel · Telegram (multichat)</span>
+    <span class="tag s">gbrain-recall · общая память</span>
+    <div class="lab">Ключевые навыки — ссылки на источник</div>
+    <ul class="repos">
+      <li><a href="https://github.com/obra/superpowers" target="_blank">superpowers</a> — методология ответов и разбора <span style="color:var(--muted);font-size:12.5px">· obra</span></li>
+      <li>кураторская настройка — дружелюбный тон, ответы по материалам интенсива <span style="color:var(--muted);font-size:12.5px">· наша настройка личности (CLAUDE.md)</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">🔑 У каждого агента: своя папка-workspace, свой файл личности <b>CLAUDE.md</b>, свой Telegram-бот и свой Bearer-токен к общей памяти. Одна архитектура — разные роли.</div>
+
+<h2><span class="n">2</span>Система памяти gbrain — общий мозг команды</h2>
+<p class="sub">Это то, что превращает отдельных агентов в команду: общая память + канал координации.</p>
+<div class="card">
+  <p><b>gbrain</b> — общий второй мозг всех агентов. База на сервере: <b>Postgres + pgvector</b> (векторный поиск по смыслу) + <b>FastEmbed</b> (multilingual). Доступ — через MCP-инструменты, не руками.</p>
+  <table>
+    <tr><th>Сервер</th><th>Порт</th><th>Зачем</th></tr>
+    <tr><td>gbrain-memory</td><td>8767</td><td>запись: решения, error-паттерны, рунбуки, заметки</td></tr>
+    <tr><td>gbrain-recall</td><td>8768</td><td>семантический поиск по всей памяти команды (по смыслу)</td></tr>
+    <tr><td>gbrain-swarm</td><td>8766</td><td>шина координации: агенты передают задачи друг другу (notify/broadcast/escalate)</td></tr>
+    <tr><td>gbrain-tasks</td><td>—</td><td>задачи, статусы, heartbeat агентов (4-й слой модели)</td></tr>
+  </table>
+  <div class="note" style="margin:12px 0 0">💡 Главное: <b>что записал один агент — видят все</b>. Germiona сохранила error-паттерн → Hormozi и Warren найдут его через recall. Это общий, а не личный слой. Между собой агенты общаются НЕ через Telegram, а через swarm-шину.</div>
+</div>
+
+<h2><span class="n">3</span>Скиллы и откуда всё создано</h2>
+<p class="sub">Основа команды — публичный репозиторий AgentOS. Ссылки активные — можно открыть.</p>
+<div class="card">
+  <h3>⚡ Superpowers — обязательная методология</h3>
+  <p>Каркас дисциплины: spec → план → TDD → review → verification. Загружается в каждый промпт — агент не может пропустить чеклист. Репозиторий: <a href="https://github.com/obra/superpowers" target="_blank">github.com/obra/superpowers</a> (+ официальный marketplace Anthropic).</p>
+  <h3 style="margin-top:16px">📦 Основа роя — репозиторий AgentOS Skills</h3>
+  <p>Отсюда собрана вся команда: архитектура роя, шаблоны CLAUDE.md, боевой урок «3 агента», прикладные скиллы.<br>
+  👉 <a href="https://github.com/qwwiwi/agentos-skills" target="_blank">github.com/qwwiwi/agentos-skills</a></p>
+  <h3 style="margin-top:16px">🔗 5 связанных публичных репозиториев</h3>
+  <ul class="repos">
+    <li><a href="https://github.com/qwwiwi/public-architecture-claude-code" target="_blank">public-architecture-claude-code</a> — генератор workspace нового агента (CLAUDE.md, hooks, память)</li>
+    <li><a href="https://github.com/qwwiwi/public-gbrain-agentos" target="_blank">public-gbrain-agentos</a> — self-host общего мозга (Postgres + pgvector + 3 MCP-сервера)</li>
+    <li><a href="https://github.com/qwwiwi/dashi-plugin-claude-code" target="_blank">dashi-plugin-claude-code</a> — подключение Telegram (channel-паттерн, наш текущий)</li>
+    <li><a href="https://github.com/qwwiwi/edgelab-claude-md" target="_blank">edgelab-claude-md</a> — руководство по CLAUDE.md (анатомия из 18 элементов)</li>
+    <li><a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank">skill-creator</a> (Anthropic) — фабрика новых скиллов</li>
+  </ul>
+</div>
+
+<h2><span class="n">4</span>Как собрать себе такой же рой</h2>
+<p class="sub">Один промпт + один репозиторий → рабочая команда за ~90 минут. Пошагово:</p>
+<div class="card">
+  <div class="step"><div class="num">1</div><div><b>Склонировать основу:</b> <a href="https://github.com/qwwiwi/agentos-skills" target="_blank">agentos-skills</a> — там архитектура и шаблоны.</div></div>
+  <div class="step"><div class="num">2</div><div><b>Прочитать</b> главный документ <b>AGENTIC-SWARM.md</b> (~15 мин) — как устроен рой целиком.</div></div>
+  <div class="step"><div class="num">3</div><div><b>Пройти боевой урок</b> lesson-3-agents-with-gbrain (9 шагов, ~90 мин) — создаёшь трёх агентов.</div></div>
+  <div class="step"><div class="num">4</div><div><b>Заполнить личности</b> — 4 шаблона CLAUDE.md (кодер / second brain / маркетолог / продажи) под свои роли.</div></div>
+  <div class="step"><div class="num">5</div><div><b>Поднять сервисы:</b> общий мозг gbrain (Postgres+pgvector) + Telegram (dashi-plugin) + генератор workspace.</div></div>
+  <div class="step"><div class="num">6</div><div><b>Поставить скиллы:</b> Superpowers (обязательно) + прикладные под роли (senior-brainstorm, telegram-bot-builder, yt-research…).</div></div>
+  <div class="step"><div class="num">7</div><div><b>Связать через gbrain-swarm</b> — агенты начинают передавать задачи друг другу. Рой готов.</div></div>
+  <div class="note" style="margin-top:16px">Философия репозитория: «Один промпт. Один репозиторий. Никаких догадок.» Ученик даёт своему агенту ссылку на agentos-skills и промпт «подними мне команду из трёх агентов» — агент читает документацию сам и собирает рой.</div>
+</div>
+
+<footer>
+  Паспорта команды AI-агентов · собрано агентом-кодером Germiona на Claude Code · основа: AgentOS Skills
+</footer>
+
+</div>
+</body>
+</html>
