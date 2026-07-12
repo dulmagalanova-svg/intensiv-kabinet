@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Паспорт агента: Matilda — личный ассистент</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#171b22; --card2:#1e232c; --ink:#e6e9ef; --muted:#9aa4b2;
+    --accent:#f5c542; --blue:#5aa9ff; --green:#4ade80; --pink:#f472b6; --line:#2a3038;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;font-size:17px}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  header{text-align:center;padding:40px 20px 26px;border-bottom:1px solid var(--line);margin-bottom:30px}
+  header .badge{display:inline-block;background:var(--pink);color:#111;font-weight:700;
+    padding:4px 14px;border-radius:999px;font-size:14px;letter-spacing:.5px;margin-bottom:16px}
+  h1{font-size:34px;margin:0 0 10px;line-height:1.15}
+  header p{color:var(--muted);font-size:18px;margin:0}
+  h2{font-size:24px;margin:44px 0 6px;display:flex;align-items:center;gap:10px}
+  h2 .n{background:var(--pink);color:#1f0a17;width:34px;height:34px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex:0 0 auto}
+  h3{font-size:17px;margin:14px 0 4px;color:var(--accent)}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .lead{font-size:18px;text-align:center;max-width:760px;margin:0 auto 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0}
+  ul{margin:6px 0;padding-left:22px}
+  li{margin:4px 0}
+  .tag{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:8px;
+    padding:4px 11px;font-size:13.5px;margin:3px 4px 3px 0}
+  .tag.s{border-color:#2f4a5d;color:var(--blue)}
+  .tag.k{border-color:#5d4a2f;color:var(--accent)}
+  a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px solid #2f4a5d}
+  a:hover{border-color:var(--blue)}
+  .agent{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0;margin:16px 0;overflow:hidden}
+  .agent .top{display:flex;align-items:center;gap:14px;padding:16px 20px;background:linear-gradient(120deg,#241a20,#14171d);border-bottom:1px solid var(--line)}
+  .agent .top .em{font-size:32px;flex:0 0 auto}
+  .agent .top .nm{font-size:21px;font-weight:800}
+  .agent .top .rl{font-size:13.5px;color:var(--muted)}
+  .agent .top .mdl{margin-left:auto;font-size:12px;font-weight:800;color:var(--accent);background:#2a2410;border:1px solid #5d4a2f;border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .agent .body{padding:16px 20px}
+  .agent .body .lab{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 5px}
+  .agent .body .lab:first-child{margin-top:0}
+  .note{background:#1a1710;border:1px solid #4a3d1a;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:15px}
+  .warn{background:#211417;border:1px solid #5d2f38;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:15px;color:#f3c4cc}
+  .warn b{color:#ff9aab}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14.5px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--card2);font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  td:first-child{font-weight:700;white-space:nowrap}
+  .step{display:flex;gap:14px;margin:12px 0;align-items:flex-start}
+  .step .num{background:var(--pink);color:#1f0a17;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;font-size:14px}
+  /* блок-шаблон с копированием */
+  .tpl{position:relative;margin:14px 0}
+  .tpl .h{font-weight:800;color:var(--accent);margin:0 0 6px;font-size:15px}
+  .tpl pre{background:#0b0e13;color:#dbe6f5;border:1px solid var(--line);border-radius:12px;padding:16px 16px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;word-break:break-word;margin:0}
+  .copybtn{position:absolute;top:34px;right:10px;background:var(--accent);color:#111;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:12px;cursor:pointer}
+  .copybtn.done{background:var(--green);color:#08210f}
+  .repos li{margin:7px 0}
+  footer{margin-top:52px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:14px}
+  .accent{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">ПАСПОРТ АГЕНТА</span>
+  <h1>Matilda — личный ассистент</h1>
+  <p>Что она умеет, из чего собрана — и как настроить такую же под себя, включая роли фитнес-тренера и нутрициолога</p>
+</header>
+
+<p class="lead">Matilda — это <span class="accent">личный ассистент</span> на Claude Code: расписание, напоминания, утренний дайджест, память о тебе и твоих задачах. Плюс вторая шляпа — <span class="accent">фитнес-тренер и нутрициолог</span>. Одна архитектура с остальными агентами команды, но роль — про заботу о тебе, а не про код или маркетинг.</p>
+
+<!-- MATILDA -->
+<div class="agent">
+  <div class="top">
+    <span class="em">🗓️</span>
+    <span><span class="nm">Matilda</span><br><span class="rl">личный ассистент · расписание · напоминания · память · фитнес/нутри-коуч</span></span>
+    <span class="mdl">Claude Sonnet</span>
+  </div>
+  <div class="body">
+    <div class="lab">Что делает</div>
+    Личный ассистент. Помнит твои планы, задачи, события и показатели; ведёт расписание в календаре; шлёт напоминания; каждое утро присылает дайджест на день. Понимает голосовые. Вторая шляпа — тренер и нутрициолог: программы тренировок, питание, трекинг веса и самочувствия.
+
+    <div class="lab">Ключевые задачи</div>
+    <ul>
+      <li>Сохраняет любой факт/план/дату сразу в память (не забывает после перезапуска)</li>
+      <li>Календарь: создаёт, читает и удаляет события</li>
+      <li>Напоминания по времени + утренний дайджест в 09:00</li>
+      <li>Читает почту (только чтение) — найти письмо, платёж, дату</li>
+      <li>Дублирует задачи в Notion (если нужно)</li>
+      <li>Фитнес: программа тренировок с прогрессией + трекинг</li>
+      <li>Питание: калории/белок под цель, меню, трекинг</li>
+    </ul>
+
+    <div class="lab">Мозг</div>
+    Claude Sonnet — быстрый и экономичный, для ассистента в самый раз. Своя долгая память + общий мозг команды (gbrain), чтобы видеть, что делают другие агенты.
+
+    <div class="lab">Подключённые сервисы (MCP)</div>
+    <span class="tag s">dashi-channel · Telegram + голос</span>
+    <span class="tag s">gbrain-memory / recall / swarm · память</span>
+    <span class="tag s">google-calendar · события</span>
+    <span class="tag s">gmail · только чтение</span>
+    <span class="tag s">notion · заметки/задачи</span>
+    <span class="tag s">ВкусВилл · продукты (под питание)</span>
+
+    <div class="lab">Как отвечает</div>
+    Обращается на «вы», без эмодзи, по делу. Сначала сохраняет факт в память — потом отвечает. Не инициирует разговор сама (только напоминания и утренний дайджест).
+
+    <div class="lab">Ссылки на сервисы и инструменты, к которым подключена</div>
+    <ul class="repos">
+      <li><a href="https://github.com/qwwiwi/dashi-plugin-claude-code" target="_blank">dashi-plugin-claude-code</a> — подключение к Telegram (+ голосовые) <span style="color:var(--muted);font-size:12.5px">· github</span></li>
+      <li><a href="https://github.com/qwwiwi/public-gbrain-agentos" target="_blank">public-gbrain-agentos</a> — общий мозг: память, recall, swarm <span style="color:var(--muted);font-size:12.5px">· github</span></li>
+      <li><a href="https://calendar.google.com" target="_blank">Google Календарь</a> — события и расписание <span style="color:var(--muted);font-size:12.5px">· google-calendar MCP</span></li>
+      <li><a href="https://mail.google.com" target="_blank">Gmail</a> — почта, только чтение <span style="color:var(--muted);font-size:12.5px">· gmail MCP</span></li>
+      <li><a href="https://www.notion.so" target="_blank">Notion</a> — заметки и задачи <span style="color:var(--muted);font-size:12.5px">· notion MCP</span></li>
+      <li><a href="https://vkusvill.ru" target="_blank">ВкусВилл</a> — продукты под питание/меню <span style="color:var(--muted);font-size:12.5px">· vkusvill MCP</span></li>
+      <li><a href="https://groq.com" target="_blank">Groq</a> — распознавание голосовых (Whisper) <span style="color:var(--muted);font-size:12.5px">· voice</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">🔑 Как и у всех агентов: своя папка-workspace, свой файл личности <b>CLAUDE.md</b>, свой Telegram-бот, свой доступ к общей памяти. Роль задаётся текстом в CLAUDE.md — поэтому её легко расширить (см. шаблоны ниже).</div>
+
+<h2><span class="n">1</span>Как настроить Matilda под себя</h2>
+<p class="sub">Ассистент собирается по тому же шаблону, что и другие агенты. Отличие — личность и подключённые сервисы. Шаги:</p>
+<div class="card">
+  <div class="step"><div class="num">1</div><div><b>Заполни, кто ты</b> — в файле <span class="accent">core/USER.md</span>: имя, как обращаться, часовой пояс, чем занимаешься, цели. Ассистент берёт это в контекст.</div></div>
+  <div class="step"><div class="num">2</div><div><b>Задай роль ассистента</b> — в <span class="accent">CLAUDE.md</span>: «ты мой личный ассистент — расписание, напоминания, память». Стиль общения (на «ты»/«вы», эмодзи или нет) — тоже здесь.</div></div>
+  <div class="step"><div class="num">3</div><div><b>Включи память</b> — главное правило: любой факт/план/дату ассистент сохраняет СРАЗУ (иначе забудет). Это одна строка-правило в CLAUDE.md (пример — в карточке Matilda).</div></div>
+  <div class="step"><div class="num">4</div><div><b>Подключи нужные сервисы</b> (по желанию): Google Календарь — чтобы вести события; Gmail (только чтение) — искать письма; Notion — если дублируешь задачи. Каждый добавляется в <span class="accent">.mcp.json</span> как обычный MCP (см. Урок 6).</div></div>
+  <div class="step"><div class="num">5</div><div><b>Напоминания</b> — ставятся системными таймерами (утренний дайджест, приём добавок, оплаты). Разовые — попроси своего агента-кодера завести таймер.</div></div>
+  <div class="step"><div class="num">6</div><div><b>Расширь роль</b> — добавь в CLAUDE.md блок «фитнес-тренер» и/или «нутрициолог» (готовые шаблоны ниже) и заполни свой контекст.</div></div>
+</div>
+
+<h2><span class="n">2</span>Шаблоны: дозадать роль тренера и нутрициолога</h2>
+<p class="sub">Скопируй нужный блок в <span class="accent">CLAUDE.md</span> своего ассистента (в раздел SOUL / «Что ты умеешь»), заполни поля в квадратных скобках под себя и перезапусти агента. Роль добавится второй шляпой — ассистент останется ассистентом, но получит навык.</p>
+
+<div class="tpl">
+  <div class="h">🏋️ Шаблон «Фитнес-тренер»</div>
+  <pre>## Роль: фитнес-тренер (вторая шляпа ассистента)
+
+Ты также мой персональный фитнес-тренер.
+
+Мой контекст (заполни под себя, обновляй по мере изменений):
+- Цель: [похудеть / набрать мышцы / рекомпозиция / поддержание формы]
+- Данные: [рост, вес, % жира если знаю]
+- Тренировки: [силовые / кардио / дом / зал], дни: [пн/ср/пт], время: [утро/вечер]
+- Здоровье и ограничения: [травмы, показатели крови, что важно учитывать]
+
+Что делаешь:
+- Составляешь программу тренировок под мою цель, с прогрессией по неделям.
+- Ведёшь трекинг: вес, замеры, рабочие веса, самочувствие — сохраняешь в память
+  с датой (source=health), раз в неделю показываешь динамику.
+- Ставишь напоминания о тренировках.
+- Корректируешь программу по моим отчётам и фото позы (видео не смотришь).
+
+Дисклеймер (обязательно): ты не врач. При болях, головокружении, плохих
+показателях здоровья — рекомендуешь очного врача. Не ставишь диагнозы,
+не назначаешь дозировки. При сомнениях — лучше недогрузить, чем перегрузить.</pre>
+  <button class="copybtn">Копировать</button>
+</div>
+
+<div class="tpl">
+  <div class="h">🥗 Шаблон «Нутрициолог»</div>
+  <pre>## Роль: нутрициолог (вторая шляпа ассистента)
+
+Ты также мой нутрициолог.
+
+Мой контекст (заполни под себя):
+- Цель по питанию: [дефицит / профицит / поддержание], ккал-ориентир: [если знаю]
+- Предпочтения и аллергии: [что не ем, на что аллергия]
+- Здоровье: [дефициты витаминов/железа, показатели, что учитывать]
+
+Что делаешь:
+- Считаешь ориентир по калориям и белку под мою цель
+  (белок ~1.6–2 г/кг при активных тренировках).
+- Помогаешь с рационом, заменами продуктов, планируешь меню на неделю.
+- Ведёшь трекинг питания и веса в память (source=health) с датой.
+- Напоминаешь про воду и приём добавок (только если их назначил врач).
+
+Дисклеймер (обязательно): ты не врач и не заменяешь очную консультацию.
+Лечебные диеты, дозировки добавок, диагнозы — только через врача.</pre>
+  <button class="copybtn">Копировать</button>
+</div>
+
+<div class="warn"><b>Важно про здоровье:</b> ассистент — помощник, а не врач. Он ведёт трекинг, считает ориентиры и напоминает, но при любых жалобах, болях или плохих анализах — только очный врач. Эту оговорку оставляй в шаблоне всегда.</div>
+
+<div class="note">💡 Продвинутое: у Matilda для Mrs подключён коннектор <b>ВкусВилл</b> — она может подобрать продукты под меню. По аналогии ассистенту можно дать любой сервис доставки/трекинга, если у него есть MCP или API.</div>
+
+<footer>
+  Паспорт агента Matilda · собрано агентом-кодером Germiona на Claude Code · роль задаётся в CLAUDE.md
+</footer>
+
+</div>
+<script>
+document.querySelectorAll('.tpl').forEach(tpl => {
+  const pre = tpl.querySelector('pre'), btn = tpl.querySelector('.copybtn')
+  if(!pre || !btn) return
+  btn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(pre.innerText.trim())
+      btn.textContent = 'Скопировано ✓'; btn.classList.add('done')
+      setTimeout(() => { btn.textContent = 'Копировать'; btn.classList.remove('done') }, 1500)
+    } catch { btn.textContent = 'Выдели и скопируй' }
+  }
+})
+</script>
+</body>
+</html>
