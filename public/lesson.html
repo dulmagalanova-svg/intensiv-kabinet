@@ -92,6 +92,34 @@
   .lesson-nav a .ttl{font-size:14.5px;font-weight:700}
   .lesson-nav .spacer{flex:1}
   @media(max-width:560px){.lesson-nav a .ttl{display:none}}
+  /* вкладки под видео: Конспект · Таймкоды · Промпты · Ссылки · Транскрипт */
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin:10px 0 0}
+  .tabs button{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 14px;font-weight:800;font-size:15px;color:#8a8272;cursor:pointer;border-radius:8px 8px 0 0}
+  .tabs button:hover{color:var(--golddark);background:#fffdf6}
+  .tabs button.active{color:var(--golddark);border-bottom-color:var(--gold)}
+  .pane{display:none}
+  .pane.active{display:block}
+  .pane-hint{font-size:13.5px;color:#8a8577;margin:14px 2px 6px}
+  .pane-title{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--golddark);margin:18px 0 4px}
+  .tcrow{display:flex;gap:12px;align-items:baseline;padding:10px;border-bottom:1px solid var(--line);border-radius:8px;cursor:pointer;transition:background .12s}
+  .tcrow:last-child{border-bottom:none}
+  .tcrow:hover{background:var(--soft)}
+  .tcrow .tct{flex:0 0 auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#9c7a00;background:#fff3d4;border:1px solid #f0dca0;border-radius:6px;padding:2px 8px;min-width:62px;text-align:center}
+  .tcrow .tcs{font-size:15.5px;color:#2a2620;line-height:1.45}
+  .tcrow .tcgo{margin-left:auto;color:#cbbf9c;font-weight:800}
+  .tcrow:hover .tcgo{color:var(--golddark)}
+  .trrow{display:flex;gap:12px;align-items:baseline;padding:10px 10px 14px}
+  .trrow .tct{flex:0 0 auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;font-weight:700;color:#9c7a00;background:#fff3d4;border:1px solid #f0dca0;border-radius:6px;padding:2px 8px;min-width:66px;text-align:center;cursor:pointer}
+  .trrow .trs{font-size:15.5px;color:#3a3833;line-height:1.6}
+  .lcard{display:flex;gap:13px;align-items:flex-start;border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;margin:9px 0;background:#fffdf8}
+  .lcard .ico{flex:0 0 auto;width:38px;height:38px;border-radius:10px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .lcard .lt{font-weight:700;font-size:15.5px;color:#2a2620;word-break:break-word}
+  .lcard .ld{font-size:13px;color:#8a8272;font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:2px}
+  .lcard .lgo{margin-left:auto;flex:0 0 auto;align-self:center;text-decoration:none;font-weight:800;font-size:13px;color:#141414;background:linear-gradient(110deg,var(--gold2),var(--gold));border-radius:9px;padding:8px 13px;white-space:nowrap}
+  .pnum{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:7px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:13px;margin-right:8px}
+  .pblock{border:1.5px dashed #c5a23a;border-radius:14px;padding:12px 16px;margin:14px 0;background:#fffdf6}
+  .pblock .ph{font-weight:800;color:var(--golddark);margin-bottom:4px}
+  @media(max-width:560px){.tabs button{padding:9px 10px;font-size:14px}.lcard .lgo{display:none}}
 </style>
 </head>
 <body>
@@ -172,10 +200,14 @@ async function loadLesson(){
       ${next ? `<a class="next" href="/lesson.html?id=${next.id}"><span><span class="lab">Следующий</span><span class="ttl">${next.title}</span></span><span class="dir">→</span></a>` : `<span class="spacer"></span>`}
     </div>`
 
+  // разбираем body_html: вытаскиваем данные вкладок (тайм-коды + транскрипт), остальное = конспект
+  const parsed = parseBody(lesson.body_html || '')
+
   box.innerHTML = `
     <h1 style="margin:20px 0 6px">${lesson.title}</h1>
-    ${lesson.video_url ? `<div class="video"><iframe src="${lesson.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe></div>` : ``}
-    <div class="lesson-body">${lesson.body_html || ''}</div>
+    ${navHtml}
+    ${lesson.video_url ? `<div class="video" id="videoBox"><div id="kplayer"></div></div>` : ``}
+    <div id="tabsHost"></div>
     <div class="actions">
       <button class="btn" id="doneBtn" style="max-width:260px">${done ? 'Пройдено ✓' : 'Отметить пройденным'}</button>
       <a class="back" href="/lessons.html">← ко всем урокам</a>
@@ -183,13 +215,150 @@ async function loadLesson(){
     ${navHtml}
   `
 
+  mountVideo(lesson.video_url)
+  renderTabs(parsed)
   enhanceCopy()
   wireDone(done)
 }
 
+// ---------- вкладки ----------
+
+// Достаём из body_html JSON-блок вкладок (тайм-коды + транскрипт) и убираем старую плашку тайм-кодов.
+function parseBody(html){
+  const holder = document.createElement('div')
+  holder.innerHTML = html
+  let data = { tc: [], tr: [] }
+  const dataEl = holder.querySelector('#lesson-tabs')
+  if(dataEl){
+    try { data = JSON.parse(dataEl.textContent) } catch(e) { console.warn('lesson-tabs JSON', e) }
+    dataEl.remove()
+    // старая сворачивающаяся плашка тайм-кодов больше не нужна — она стала вкладкой
+    holder.querySelectorAll('.tcx-box').forEach(el => el.remove())
+  }
+  return { body: holder, tc: data.tc || [], tr: data.tr || [] }
+}
+
+function renderTabs({ body, tc, tr }){
+  const host = document.getElementById('tabsHost')
+
+  // промпты и ссылки берём прямо из конспекта — они там уже есть
+  const prompts = [...body.querySelectorAll('.prompt')].map(p => ({
+    title: (p.querySelector('.h')?.textContent || 'Промпт').trim(),
+    text: (p.querySelector('pre')?.textContent || '').trim()
+  })).filter(p => p.text)
+
+  const seen = new Set()
+  const links = [...body.querySelectorAll('a[href^="http"]')].map(a => {
+    const href = a.getAttribute('href')
+    let host2 = ''
+    try { host2 = new URL(href).hostname.replace(/^www\./, '') } catch(e) { return null }
+    if(seen.has(href)) return null
+    seen.add(href)
+    const label = (a.textContent || '').trim()
+    return { href, host: host2, title: label && label.length > 2 ? label : host2 }
+  }).filter(Boolean)
+
+  const panes = []
+  panes.push({ key: 'konspekt', label: 'Конспект', render: el => {
+    const b = document.createElement('div'); b.className = 'lesson-body'; b.innerHTML = body.innerHTML; el.appendChild(b)
+  }})
+
+  if(tc.length) panes.push({ key: 'tc', label: 'Таймкоды', render: el => {
+    el.innerHTML = `<div class="pane-hint">Нажми на момент — видео перемотается туда.</div>` +
+      tc.map(([sec, t, s]) => `<div class="tcrow" data-sec="${sec}"><span class="tct">${t}</span><span class="tcs">${esc(s)}</span><span class="tcgo">▸</span></div>`).join('')
+  }})
+
+  if(prompts.length) panes.push({ key: 'prompts', label: 'Промпты', render: el => {
+    el.innerHTML = `<div class="pane-title">&gt; промпты урока · ${prompts.length}</div>` +
+      prompts.map((p, i) => `<div class="pblock"><div class="ph"><span class="pnum">${i + 1}</span>${esc(p.title)}</div><pre>${esc(p.text)}</pre></div>`).join('')
+  }})
+
+  if(links.length) panes.push({ key: 'links', label: 'Ссылки', render: el => {
+    el.innerHTML = `<div class="pane-title">&gt; главные ссылки урока · ${links.length}</div>` +
+      links.map(l => `<div class="lcard"><div class="ico">${esc(l.host.slice(0, 1).toUpperCase())}</div><div><div class="lt">${esc(l.title)}</div><div class="ld">${esc(l.host)}</div></div><a class="lgo" href="${esc(l.href)}" target="_blank" rel="noopener">Открыть →</a></div>`).join('')
+  }})
+
+  if(tr.length) panes.push({ key: 'tr', label: 'Транскрипт', render: el => {
+    el.innerHTML = `<div class="pane-hint">Полный текст видео. Нажми на время — видео перемотается туда.</div>` +
+      tr.map(([sec, t, s]) => `<div class="trrow"><span class="tct" data-sec="${sec}">${t}</span><span class="trs">${esc(s)}</span></div>`).join('')
+  }})
+
+  // один конспект без данных вкладок — старое поведение, панель не нужна
+  if(panes.length === 1){
+    const only = document.createElement('div')
+    panes[0].render(only)
+    host.appendChild(only)
+    return
+  }
+
+  const bar = document.createElement('div'); bar.className = 'tabs'
+  const wrapEl = document.createElement('div')
+  panes.forEach((p, i) => {
+    const btn = document.createElement('button')
+    btn.textContent = p.label
+    btn.className = i === 0 ? 'active' : ''
+    btn.onclick = () => {
+      bar.querySelectorAll('button').forEach(b => b.classList.remove('active'))
+      wrapEl.querySelectorAll('.pane').forEach(x => x.classList.remove('active'))
+      btn.classList.add('active')
+      document.getElementById('pane-' + p.key).classList.add('active')
+    }
+    bar.appendChild(btn)
+
+    const pane = document.createElement('div')
+    pane.className = 'pane' + (i === 0 ? ' active' : '')
+    pane.id = 'pane-' + p.key
+    p.render(pane)
+    wrapEl.appendChild(pane)
+  })
+  host.appendChild(bar)
+  host.appendChild(wrapEl)
+
+  // клик по тайм-коду → перемотка видео
+  host.querySelectorAll('[data-sec]').forEach(el => {
+    el.onclick = () => seekTo(parseInt(el.dataset.sec, 10))
+  })
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+// ---------- видео (Kinescope IFrame Player API — нужен для перемотки по тайм-кодам) ----------
+let kPlayer = null
+
+function mountVideo(videoUrl){
+  if(!videoUrl) return
+  window.__kUrl = videoUrl.replace('/embed/', '/')   // фабрике плеера нужен обычный URL, не /embed/
+  const fallback = setTimeout(() => { if(!kPlayer) plainIframe(videoUrl) }, 6000)
+  window.onKinescopeIframeAPIReady = (factory) => {
+    factory.create('kplayer', { url: window.__kUrl, size: { width: '100%', height: '100%' } })
+      .then(p => { kPlayer = p; clearTimeout(fallback) })
+      .catch(() => { clearTimeout(fallback); plainIframe(videoUrl) })
+  }
+  const s = document.createElement('script')
+  s.src = 'https://player.kinescope.io/latest/iframe.player.js'
+  s.onerror = () => { clearTimeout(fallback); plainIframe(videoUrl) }
+  document.head.appendChild(s)
+}
+
+// если API не загрузился — обычный iframe (без перемотки, но видео работает)
+function plainIframe(videoUrl){
+  const box = document.getElementById('videoBox')
+  if(box) box.innerHTML = `<iframe src="${videoUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+}
+
+function seekTo(sec){
+  if(isNaN(sec)) return
+  document.getElementById('videoBox')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if(kPlayer){
+    kPlayer.seekTo(sec).then(() => kPlayer.play()).catch(() => {})
+  }
+}
+
 // Кнопка «Копировать» на каждый блок команды (<pre> внутри урока).
 function enhanceCopy(){
-  document.querySelectorAll('.lesson-body pre').forEach(pre => {
+  document.querySelectorAll('.lesson-body pre, #pane-prompts pre').forEach(pre => {
     const wrap = document.createElement('div')
     wrap.className = 'cmd-block'
     pre.parentNode.insertBefore(wrap, pre)
