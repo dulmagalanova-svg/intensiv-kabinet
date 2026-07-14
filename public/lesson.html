@@ -119,6 +119,25 @@
   .pnum{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:7px;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:13px;margin-right:8px}
   .pblock{border:1.5px dashed #c5a23a;border-radius:14px;padding:12px 16px;margin:14px 0;background:#fffdf6}
   .pblock .ph{font-weight:800;color:var(--golddark);margin-bottom:4px}
+  /* тест после урока */
+  .qblock{border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;background:#fffdf8}
+  .qh{font-weight:800;font-size:16px;color:#2a2620;display:flex;align-items:baseline;line-height:1.45}
+  .qopts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .qopt{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:11px;padding:11px 14px;font-size:15.5px;color:#2a2620;cursor:pointer;font-family:inherit;line-height:1.45;transition:border-color .12s,background .12s}
+  .qopt:hover:not(:disabled){border-color:var(--gold);background:#fffdf6}
+  .qopt.sel{border-color:var(--gold);background:#fff8e4;font-weight:700}
+  .qopt.good{border-color:#2e9e54;background:#eaf7ee;font-weight:700;color:#1d6b39}
+  .qopt.bad{border-color:#c0392b;background:#fbeceb;color:#8f2b20}
+  .qopt:disabled{cursor:default}
+  .qwhy{display:none}
+  .qwhy.show{display:block;margin-top:11px;font-size:15px;line-height:1.55;border-radius:10px;padding:10px 13px}
+  .qwhy.okw{background:#eaf7ee;border:1px solid #bfe3cb;color:#1d6b39}
+  .qwhy.badw{background:#fff8e8;border:1px solid #f0dca0;color:#7a5a12}
+  .qjump{cursor:pointer;font-weight:800;color:#9c7a00;white-space:nowrap}
+  .qjump:hover{text-decoration:underline}
+  .qfoot{display:flex;align-items:center;gap:14px;margin:18px 0 6px;flex-wrap:wrap}
+  .qcheck{background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;border:none;border-radius:11px;padding:12px 22px;font-weight:800;font-size:15.5px;cursor:pointer;font-family:inherit}
+  .qscore{font-weight:800;font-size:15.5px;color:#2a2620}
   @media(max-width:560px){.tabs button{padding:9px 10px;font-size:14px}.lcard .lgo{display:none}}
 </style>
 </head>
@@ -227,7 +246,7 @@ async function loadLesson(){
 function parseBody(html){
   const holder = document.createElement('div')
   holder.innerHTML = html
-  let data = { tc: [], tr: [] }
+  let data = { tc: [], tr: [], quiz: [] }
   const dataEl = holder.querySelector('#lesson-tabs')
   if(dataEl){
     try { data = JSON.parse(dataEl.textContent) } catch(e) { console.warn('lesson-tabs JSON', e) }
@@ -235,10 +254,10 @@ function parseBody(html){
     // старая сворачивающаяся плашка тайм-кодов больше не нужна — она стала вкладкой
     holder.querySelectorAll('.tcx-box').forEach(el => el.remove())
   }
-  return { body: holder, tc: data.tc || [], tr: data.tr || [] }
+  return { body: holder, tc: data.tc || [], tr: data.tr || [], quiz: data.quiz || [] }
 }
 
-function renderTabs({ body, tc, tr }){
+function renderTabs({ body, tc, tr, quiz }){
   const host = document.getElementById('tabsHost')
 
   // промпты и ссылки берём прямо из конспекта — они там уже есть
@@ -283,6 +302,8 @@ function renderTabs({ body, tc, tr }){
       tr.map(([sec, t, s]) => `<div class="trrow"><span class="tct" data-sec="${sec}">${t}</span><span class="trs">${esc(s)}</span></div>`).join('')
   }})
 
+  if(quiz.length) panes.push({ key: 'quiz', label: 'Тест', render: el => renderQuiz(el, quiz) })
+
   // один конспект без данных вкладок — старое поведение, панель не нужна
   if(panes.length === 1){
     const only = document.createElement('div')
@@ -322,6 +343,70 @@ function renderTabs({ body, tc, tr }){
 
 function esc(s){
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+// ---------- тест после урока: выбрал ответы → проверил → разбор ошибок ----------
+function renderQuiz(el, quiz){
+  const answers = new Array(quiz.length).fill(null)
+  let checked = false
+
+  el.innerHTML =
+    `<div class="pane-hint">Короткая проверка: ${quiz.length} вопрос(ов). Отвечай по памяти — где ошибся, покажу разбор и момент в видео.</div>` +
+    quiz.map((q, qi) => `
+      <div class="qblock" data-q="${qi}">
+        <div class="qh"><span class="pnum">${qi + 1}</span>${esc(q.q)}</div>
+        <div class="qopts">${q.o.map((o, oi) =>
+          `<button class="qopt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}</div>
+        <div class="qwhy" id="why-${qi}"></div>
+      </div>`).join('') +
+    `<div class="qfoot">
+       <button class="qcheck" id="qcheck">Проверить</button>
+       <span class="qscore" id="qscore"></span>
+     </div>`
+
+  el.querySelectorAll('.qopt').forEach(b => {
+    b.onclick = () => {
+      if(checked) return
+      const qi = +b.dataset.q
+      answers[qi] = +b.dataset.o
+      el.querySelectorAll(`.qopt[data-q="${qi}"]`).forEach(x => x.classList.remove('sel'))
+      b.classList.add('sel')
+    }
+  })
+
+  const btn = el.querySelector('#qcheck')
+  btn.onclick = () => {
+    if(checked){    // второй клик — пройти заново
+      renderQuiz(el, quiz)
+      return
+    }
+    const empty = answers.findIndex(a => a === null)
+    if(empty >= 0){
+      el.querySelector('#qscore').textContent = `Ответь на вопрос ${empty + 1} — он ещё пустой.`
+      return
+    }
+    checked = true
+    let right = 0
+    quiz.forEach((q, qi) => {
+      const ok = answers[qi] === q.c
+      if(ok) right++
+      el.querySelectorAll(`.qopt[data-q="${qi}"]`).forEach(x => {
+        const oi = +x.dataset.o
+        if(oi === q.c) x.classList.add('good')
+        else if(oi === answers[qi]) x.classList.add('bad')
+        x.disabled = true
+      })
+      const why = el.querySelector(`#why-${qi}`)
+      const jump = (q.sec != null)
+        ? ` <span class="qjump" data-sec="${q.sec}">▸ смотреть момент</span>` : ''
+      why.className = 'qwhy show ' + (ok ? 'okw' : 'badw')
+      why.innerHTML = `<b>${ok ? 'Верно.' : 'Мимо.'}</b> ${esc(q.why || '')}${jump}`
+    })
+    el.querySelector('#qscore').textContent =
+      `${right} из ${quiz.length}` + (right === quiz.length ? ' — урок усвоен.' : ' — перечитай разбор ниже.')
+    btn.textContent = 'Пройти заново'
+    el.querySelectorAll('.qjump').forEach(j => { j.onclick = () => seekTo(parseInt(j.dataset.sec, 10)) })
+  }
 }
 
 // ---------- видео (Kinescope IFrame Player API — нужен для перемотки по тайм-кодам) ----------
