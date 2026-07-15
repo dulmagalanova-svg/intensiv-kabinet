@@ -138,6 +138,14 @@
   .qfoot{display:flex;align-items:center;gap:14px;margin:18px 0 6px;flex-wrap:wrap}
   .qcheck{background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;border:none;border-radius:11px;padding:12px 22px;font-weight:800;font-size:15.5px;cursor:pointer;font-family:inherit}
   .qscore{font-weight:800;font-size:15.5px;color:#2a2620}
+  /* «Если застрял» */
+  .hitem{border:1.5px solid var(--line);border-radius:12px;margin:9px 0;overflow:hidden;background:#fffdf8}
+  .hq{width:100%;text-align:left;background:none;border:none;padding:13px 15px;font-weight:800;font-size:15.5px;color:#2a2620;cursor:pointer;display:flex;align-items:baseline;gap:9px;font-family:inherit;line-height:1.4}
+  .hq:hover{background:#fffdf6}
+  .harrow{color:var(--gold);font-weight:800;transition:transform .15s;display:inline-block}
+  .hq.open .harrow{transform:rotate(90deg)}
+  .ha{display:none;padding:0 15px 14px 33px;font-size:15px;line-height:1.6;color:#3a3833}
+  .ha.show{display:block}
   @media(max-width:560px){.tabs button{padding:9px 10px;font-size:14px}.lcard .lgo{display:none}}
 </style>
 </head>
@@ -302,6 +310,8 @@ function renderTabs({ body, tc, tr, quiz }){
       tr.map(([sec, t, s]) => `<div class="trrow"><span class="tct" data-sec="${sec}">${t}</span><span class="trs">${esc(s)}</span></div>`).join('')
   }})
 
+  panes.push({ key: 'help', label: 'Если застрял', render: el => renderHelp(el) })
+
   if(quiz.length) panes.push({ key: 'quiz', label: 'Тест', render: el => renderQuiz(el, quiz) })
 
   // один конспект без данных вкладок — старое поведение, панель не нужна
@@ -343,6 +353,40 @@ function renderTabs({ body, tc, tr, quiz }){
 
 function esc(s){
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+// ---------- «Если застрял»: частые затыки на любом уроке + фикс ----------
+const HELP_ITEMS = [
+  { q: 'Агент не отвечает / завис (крутится и молчит)',
+    a: 'Чаще всего он ждёт разрешения или подвис. Останови сессию (Ctrl+C в терминале) и запусти заново командой <code>bash start.sh</code>. В первые дни это нормально — дальше будет стабильнее.' },
+  { q: 'Выскочило «Do you want to proceed?» и всё встало',
+    a: 'Это запрос разрешения. Нажми цифру <b>2</b> и Enter («Yes, and don\'t ask again») — агент запомнит и больше не будет спрашивать про это действие.' },
+  { q: 'Устанавливаю MCP/сервис — агент молчит в Telegram',
+    a: 'Подключение сервисов делай в <b>терминале VS Code</b>, а не в Telegram: там некому нажать «разрешить», и агент зависает на запросе.' },
+  { q: 'Я случайно отправила ключ/токен прямо в чат',
+    a: 'Считай его засвеченным. Зайди в сервис, где брала ключ, <b>отзови его и создай новый</b>. Удалить сообщение — недостаточно. Ключи всегда отдаём агенту, чтобы он положил их в защищённый файл, а не пишем в открытый чат.' },
+  { q: 'Бот вообще не отвечает после установки',
+    a: 'Проверь: 1) агент запущен (<code>bash start.sh</code>, окно не закрыто); 2) в настройках вписан правильный токен бота и твой Telegram ID; 3) ты пишешь тому боту, которого создала в @BotFather.' },
+  { q: 'Терминал на Windows выглядит не так, как в уроке',
+    a: 'У ведущей Mac — на Windows терминал и VS Code выглядят чуть иначе, но команды те же. Новую сессию на Windows открывают внутри VS Code («новый терминал»), а не отдельным окном. Команды копируй один в один.' },
+  { q: 'Ничего не помогло',
+    a: 'Напиши куратору в чат интенсива — приложи скриншот экрана целиком (видно команду и ошибку). Так разберём быстрее всего.' },
+]
+function renderHelp(el){
+  el.innerHTML =
+    `<div class="pane-hint">Самые частые затыки на этом и любом другом уроке — и что делать. Нажми на вопрос.</div>` +
+    HELP_ITEMS.map((it, i) => `
+      <div class="hitem">
+        <button class="hq" data-i="${i}"><span class="harrow">▸</span>${esc(it.q)}</button>
+        <div class="ha" id="ha-${i}">${it.a}</div>
+      </div>`).join('')
+  el.querySelectorAll('.hq').forEach(b => {
+    b.onclick = () => {
+      const a = el.querySelector('#ha-' + b.dataset.i)
+      const open = a.classList.toggle('show')
+      b.classList.toggle('open', open)
+    }
+  })
 }
 
 // ---------- тест после урока: выбрал ответы → проверил → разбор ошибок ----------
