@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пайплайн: поиск залетевших рилсов → сценарий в твоём стиле</title>
+<style>
+  :root{
+    --paper:#f4f1ea; --card:#ffffff; --ink:#1c1a17; --ink2:#4d483f; --gray:#8a8479;
+    --acc:#B9860B; --acc-br:#E8B923; --line:#e4ddcd; --dark:#191919;
+    --green:#2f7d55; --greenbg:#eaf4ee; --blue:#2a6db0; --bluebg:#e9f1fa;
+    --serif:'PT Serif',Georgia,'DejaVu Serif',serif;
+    --sans:'Segoe UI',Roboto,Helvetica,'DejaVu Sans',sans-serif;
+    --mono:ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.55;padding:0 0 70px}
+  .wrap{max-width:900px;margin:0 auto;padding:0 22px}
+  header{background:var(--dark);color:#fff;padding:50px 0 42px;margin-bottom:34px}
+  .eyebrow{color:var(--acc-br);font-size:14px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:40px;line-height:1.1;margin:12px 0 10px;color:#fff}
+  header p{color:#c9c3b5;font-size:17px;max-width:720px}
+  h2{font-family:var(--serif);font-size:27px;margin:42px 0 6px;border-bottom:3px solid var(--acc-br);padding-bottom:9px;display:inline-block}
+  h3{font-size:20px;margin:26px 0 8px;font-weight:800}
+  p{margin:8px 0;color:var(--ink2)}
+  strong{color:var(--ink)}
+  ul,ol{margin:9px 0 9px 22px}
+  li{margin:6px 0;color:var(--ink2)}
+  .lead{font-size:18px;color:var(--ink2);margin:12px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:14px 0}
+  .card.acc{border-left:5px solid var(--acc-br)}
+  .out{background:var(--greenbg);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .out .lbl{color:var(--green);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .note{background:var(--bluebg);border-left:4px solid var(--blue);border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .note .lbl{color:var(--blue);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .warn{background:#fbeee9;border-left:4px solid #b23b3b;border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .warn .lbl{color:#b23b3b;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .steps{counter-reset:s;list-style:none;margin-left:0}
+  .steps>li{counter-increment:s;position:relative;padding:14px 0 14px 52px;border-bottom:1px solid var(--line)}
+  .steps>li::before{content:counter(s);position:absolute;left:0;top:12px;width:34px;height:34px;background:var(--acc-br);color:#191919;border-radius:50%;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .steps>li .st{font-weight:800;font-size:17px;color:var(--ink)}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px;background:var(--card);border-radius:10px;overflow:hidden}
+  th{background:var(--dark);color:#fff;text-align:left;padding:10px 12px;font-size:13px}
+  td{padding:9px 12px;border-top:1px solid var(--line);color:var(--ink2);vertical-align:top}
+  td b{color:var(--ink)}
+  code{font-family:var(--mono);background:#efe9da;padding:1px 6px;border-radius:5px;font-size:13.5px;color:#5a4a12}
+  .promptbox{background:#161310;color:#f3e9cf;border-radius:12px;padding:18px 20px;margin:14px 0;font-family:var(--sans);font-size:14.5px;line-height:1.6;white-space:pre-wrap}
+  .promptbox .ph{color:var(--acc-br);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:10px}
+  .chk{list-style:none;margin-left:0}
+  .chk li{padding-left:28px;position:relative}
+  .chk li::before{content:'☐';position:absolute;left:0;color:var(--acc);font-weight:800}
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--gray);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Инструкция для маркетинг-агента</div>
+    <h1>Пайплайн: залетевшие рилсы → сценарий в твоём стиле</h1>
+    <p>Как агент сам находит вирусные рилсы конкурентов, расшифровывает их и переписывает под твой Tone of Voice. Настраиваешь один раз — дальше присылаешь список конкурентов и получаешь готовые сценарии.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="out"><span class="lbl">Что на выходе</span> По каждому залетевшему рилсу — <b>дословный транскрипт</b> + <b>сценарий-телесуфлёр в твоём Tone of Voice</b> (что говорить на камеру) + <b>ТЗ монтажёру</b> (раскадровка, плашки, тайминги). Тебе остаётся снять и смонтировать.</div>
+
+  <h2>Как это работает — в двух словах</h2>
+  <div class="card acc">
+    Агент берёт аккаунты конкурентов → через сервис HikerAPI вытягивает их рилсы и сортирует по просмотрам → скачивает самые залетевшие → извлекает звук → расшифровывает в текст → переводит (если на другом языке) → переписывает под твой стиль → отдаёт сценарий + ТЗ монтажёру. Всё автоматически, руками ничего скачивать не надо.
+  </div>
+
+  <h2>Часть 1. Что настроить один раз</h2>
+  <p class="lead">Это делается один раз. Дальше просто пользуешься.</p>
+
+  <table>
+    <tr><th>Что</th><th>Зачем</th><th>Как получить / цена</th></tr>
+    <tr><td><b>HikerAPI</b> — ключ доступа</td><td>Достаёт рилсы конкурентов и их метрики (просмотры, лайки) без ручного скачивания</td><td>Регистрация на <code>hikerapi.com</code> → раздел API keys → скопировать ключ. ~$30–50/мес</td></tr>
+    <tr><td><b>Groq</b> — ключ для расшифровки</td><td>Превращает звук рилса в текст (модель Whisper). Быстро и почти бесплатно</td><td>Регистрация на <code>console.groq.com</code> → API keys → создать ключ. Бесплатный лимит хватает</td></tr>
+    <tr><td><b>ffmpeg</b> — программа</td><td>Достаёт звуковую дорожку из видео перед расшифровкой</td><td>Бесплатно, ставит технический агент/помощник одной командой</td></tr>
+    <tr><td><b>Твой Tone of Voice</b></td><td>Чтобы сценарий звучал твоим голосом, а не переводом</td><td>Короткое описание: тон, обращение (ты/вы), запретные слова, примеры фраз. Даёшь агенту один раз</td></tr>
+  </table>
+
+  <div class="warn"><span class="lbl">Безопасность</span> Ключи HikerAPI и Groq — как пароли. Храни в защищённом файле у агента (не в открытом чате, не в репозитории, не пересылай в переписке). Каждый ученик заводит СВОИ ключи — чужими не пользуются.</div>
+
+  <h2>Часть 2. Что даёшь агенту каждый раз</h2>
+  <ul class="chk">
+    <li><b>Список конкурентов</b> — 3–7 аккаунтов Instagram в твоей нише (чьи рилсы хочешь разобрать). Просто ники, например <code>@nick1, @nick2</code>.</li>
+    <li><b>Сколько рилсов</b> взять и за какой период (например «топ-5 за последний месяц по просмотрам»).</li>
+    <li>(один раз) <b>Твой Tone of Voice</b> — если ещё не давала.</li>
+  </ul>
+  <p>Всё. Дальше агент делает сам.</p>
+
+  <h2>Часть 3. Пайплайн по шагам (что делает агент)</h2>
+  <ol class="steps">
+    <li><div class="st">Находит аккаунты конкурентов</div>По нику получает ID аккаунта через HikerAPI. Если нужны новые конкуренты — ищет похожие по хэштегам ниши.</li>
+    <li><div class="st">Собирает их рилсы и метрики</div>Тянет последние публикации каждого аккаунта с числом просмотров, лайков, комментариев.</li>
+    <li><div class="st">Отбирает залетевшие</div>Сортирует по просмотрам, берёт топ (например топ-5). Именно вирусные — то, что уже проверено аудиторией, а не случайные ролики.</li>
+    <li><div class="st">Скачивает видео</div>Забирает файлы отобранных рилсов по прямым ссылкам.</li>
+    <li><div class="st">Достаёт звук</div>Через ffmpeg извлекает аудиодорожку из видео (в mp3/wav).</li>
+    <li><div class="st">Расшифровывает в текст</div>Отправляет звук в Groq (Whisper) → получает дословный транскрипт того, что говорят в ролике.</li>
+    <li><div class="st">Переводит (если надо)</div>Если рилс на английском/другом языке — переводит на русский, сохраняя смысл и структуру.</li>
+    <li><div class="st">Переписывает в твой Tone of Voice</div>Не тупой перевод, а адаптация: тот же цепляющий скелет (хук → польза → призыв), но твоим голосом, твоими словами, под твою нишу. Убирает чужой пафос, добавляет твои сигнатурные фразы.</li>
+    <li><div class="st">Отдаёт готовое</div>По каждому рилсу: ссылка + метрики + транскрипт + сценарий-телесуфлёр (что говорить) + ТЗ монтажёру (раскадровка, плашки, тайминги).</li>
+  </ol>
+
+  <div class="note"><span class="lbl">Почему это работает</span> Ты не гадаешь, что снять. Берёшь то, что УЖЕ залетело у конкурентов (проверено просмотрами), и переупаковываешь под себя. Риск «снял, а не зашло» падает в разы.</div>
+
+  <h2>Часть 4. Готовый промпт для агента</h2>
+  <p>Скопируй это своему маркетинг-агенту (подставь свои данные в квадратные скобки):</p>
+  <div class="promptbox"><span class="ph">Промпт для агента — копировать целиком</span>Ты мой маркетинг-агент. Настрой и выполняй пайплайн ресёрча рилсов.
+
+РАЗОВАЯ НАСТРОЙКА (сделай один раз, ключи храни в защищённом файле, не выводи в чат):
+1. Возьми мой ключ HikerAPI и ключ Groq из [где я их положила].
+2. Убедись, что установлен ffmpeg (если нет — поставь).
+3. Запомни мой Tone of Voice: [тон / обращение ты-вы / запретные слова / 2-3 примера моих фраз].
+
+КАЖДЫЙ ЗАПУСК:
+Вход от меня — список конкурентов и сколько рилсов взять.
+Мои конкуренты: [@ник1, @ник2, @ник3].
+Возьми: топ-[5] рилсов за [последний месяц] по числу просмотров.
+
+Что сделай по шагам:
+1. Через HikerAPI получи ID каждого аккаунта и вытяни их рилсы с метриками (просмотры/лайки/комменты).
+2. Отсортируй по просмотрам, отбери топ-[5] залетевших.
+3. Скачай видео отобранных рилсов.
+4. Через ffmpeg достань аудио, отправь в Groq (Whisper) → получи дословный транскрипт.
+5. Если рилс не на русском — переведи, сохранив структуру.
+6. Перепиши каждый в МОЙ Tone of Voice: сохрани рабочий скелет (хук → польза → призыв), но моим голосом, под мою нишу. Не перевод, а адаптация.
+
+Выдай по каждому рилсу:
+— ссылку на оригинал + метрики (просмотры)
+— дословный транскрипт
+— сценарий-телесуфлёр (что говорить на камеру, по моему TOV)
+— ТЗ монтажёру (раскадровка по секундам, плашки, тайминги, формат 9:16)
+
+Оформи всё одним аккуратным документом.</div>
+
+  <h2>Часть 5. Технические детали (для тех-агента)</h2>
+  <div class="card">
+    <p>Если агент технический — вот опорные точки, остальное он допишет сам:</p>
+    <ul>
+      <li><b>HikerAPI:</b> получить user id по нику → вытянуть медиа аккаунта → в ответе поле числа просмотров (<code>play_count</code>) → сортировать по нему. Есть поиск аккаунтов и рилсов по хэштегам ниши для расширения списка конкурентов.</li>
+      <li><b>Скачивание:</b> прямая ссылка на видео из ответа HikerAPI → сохранить файл.</li>
+      <li><b>Аудио:</b> <code>ffmpeg -i reel.mp4 -vn -acodec libmp3lame reel.mp3</code></li>
+      <li><b>Транскрипт:</b> Groq API, модель <code>whisper-large-v3</code>, отправить аудиофайл → получить текст.</li>
+      <li><b>Автоматизация:</b> можно поставить на расписание (раз в неделю) — агент сам собирает свежие залетевшие и присылает пачку сценариев.</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    Пайплайн-инструкция для учеников интенсива «AI-команда на Claude». Ключи HikerAPI/Groq — личные у каждого, хранятся защищённо. Сервисы: hikerapi.com (сбор рилсов), console.groq.com (расшифровка). Сценарии всегда проходят через личный Tone of Voice — это ядро, без него будет чужой голос.
+  </div>
+
+</div>
+</body>
+</html>
