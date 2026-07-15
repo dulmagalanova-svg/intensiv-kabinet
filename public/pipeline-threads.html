@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пайплайн: залетающий контент в Threads → автопостинг через агента</title>
+<style>
+  :root{
+    --paper:#f4f1ea; --card:#ffffff; --ink:#1c1a17; --ink2:#4d483f; --gray:#8a8479;
+    --acc:#B9860B; --acc-br:#E8B923; --line:#e4ddcd; --dark:#191919;
+    --green:#2f7d55; --greenbg:#eaf4ee; --blue:#2a6db0; --bluebg:#e9f1fa;
+    --serif:'PT Serif',Georgia,'DejaVu Serif',serif;
+    --sans:'Segoe UI',Roboto,Helvetica,'DejaVu Sans',sans-serif;
+    --mono:ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.55;padding:0 0 70px}
+  .wrap{max-width:900px;margin:0 auto;padding:0 22px}
+  header{background:var(--dark);color:#fff;padding:50px 0 42px;margin-bottom:34px}
+  .eyebrow{color:var(--acc-br);font-size:14px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:38px;line-height:1.1;margin:12px 0 10px;color:#fff}
+  header p{color:#c9c3b5;font-size:17px;max-width:720px}
+  h2{font-family:var(--serif);font-size:26px;margin:42px 0 6px;border-bottom:3px solid var(--acc-br);padding-bottom:9px;display:inline-block}
+  h3{font-size:20px;margin:26px 0 8px;font-weight:800}
+  p{margin:8px 0;color:var(--ink2)}
+  strong{color:var(--ink)}
+  ul,ol{margin:9px 0 9px 22px}
+  li{margin:6px 0;color:var(--ink2)}
+  .lead{font-size:18px;color:var(--ink2);margin:12px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:14px 0}
+  .card.acc{border-left:5px solid var(--acc-br)}
+  .out{background:var(--greenbg);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .out .lbl{color:var(--green);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .note{background:var(--bluebg);border-left:4px solid var(--blue);border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .note .lbl{color:var(--blue);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .warn{background:#fbeee9;border-left:4px solid #b23b3b;border-radius:0 10px 10px 0;padding:12px 16px;margin:10px 0}
+  .warn .lbl{color:#b23b3b;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .steps{counter-reset:s;list-style:none;margin-left:0}
+  .steps>li{counter-increment:s;position:relative;padding:14px 0 14px 52px;border-bottom:1px solid var(--line)}
+  .steps>li::before{content:counter(s);position:absolute;left:0;top:12px;width:34px;height:34px;background:var(--acc-br);color:#191919;border-radius:50%;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .steps>li .st{font-weight:800;font-size:17px;color:var(--ink)}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px;background:var(--card);border-radius:10px;overflow:hidden}
+  th{background:var(--dark);color:#fff;text-align:left;padding:10px 12px;font-size:13px}
+  td{padding:9px 12px;border-top:1px solid var(--line);color:var(--ink2);vertical-align:top}
+  td b{color:var(--ink)}
+  code{font-family:var(--mono);background:#efe9da;padding:1px 6px;border-radius:5px;font-size:13.5px;color:#5a4a12}
+  .promptbox{position:relative;background:#161310;color:#f3e9cf;border-radius:12px;padding:18px 20px;margin:14px 0;font-family:var(--sans);font-size:14.5px;line-height:1.6;white-space:pre-wrap}
+  .promptbox .ph{color:var(--acc-br);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:10px}
+  .pcopy{position:absolute;top:12px;right:12px;background:linear-gradient(120deg,#F7D14B,#B9860B);color:#191919;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12.5px;cursor:pointer}
+  .pcopy.done{background:var(--green);color:#fff}
+  .chk{list-style:none;margin-left:0}
+  .chk li{padding-left:28px;position:relative}
+  .chk li::before{content:'☐';position:absolute;left:0;color:var(--acc);font-weight:800}
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--gray);font-size:13px}
+  .tag{display:inline-block;background:#efe9da;color:#5a4a12;font-weight:700;font-size:12.5px;border-radius:999px;padding:3px 11px;margin:3px 5px 3px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Инструкция для маркетинг-агента</div>
+    <h1>Залетающий контент в Threads → автопостинг через агента</h1>
+    <p>Как агент разбирает залетевшие ветки конкурентов, генерит посты под пересылки в твоём стиле и сам публикует их в Threads через официальный API. Настраиваешь один раз — дальше присылаешь тему и получаешь готовые посты (или автопостинг по расписанию).</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="out"><span class="lbl">Что на выходе</span> Пачка постов для Threads, заточенных под <b>пересылки и охват</b> (хук → ценность → мысль, которую хочется репостнуть), в твоём Tone of Voice — и агент, который сам публикует их через официальный API Meta, разово или по расписанию.</div>
+
+  <h2>Главное про Threads: что реально репостят</h2>
+  <div class="card acc">
+    На Threads охват растёт не с рекламы, а с постов, которые вызывают реакцию «согласен / зацепило / хочу сохранить». Работают: <b>личные инсайты и истории с выводом</b>, <b>спорные тезисы</b> (мнение против мейнстрима), <b>полезные списки</b>, <b>короткие сильные наблюдения</b>. Не работает: сухая реклама, длинные простыни без хука, «купите у меня». Пайплайн генерит именно репостный формат.
+  </div>
+
+  <h2>Часть 1. Что настроить один раз</h2>
+  <table>
+    <tr><th>Что</th><th>Зачем</th><th>Как получить</th></tr>
+    <tr><td><b>Meta for Developers</b> — приложение + токен Threads API</td><td>Официальный доступ к публикации в Threads (без риска бана)</td><td><code>developers.facebook.com</code> → создать App → добавить продукт Threads API → подключить твой аккаунт Threads → получить access token</td></tr>
+    <tr><td><b>Твой Tone of Voice</b></td><td>Чтобы посты звучали тобой, а не нейросетью</td><td>Короткое описание: тон, обращение (ты/вы), запретные слова, 3-5 примеров твоих сильных фраз</td></tr>
+    <tr><td><b>Примеры залетевших веток</b></td><td>Чтобы агент понял, ЧТО именно репостят в твоей нише</td><td>5-10 ссылок на вирусные ветки или 3-5 авторов твоей ниши, которые хорошо набирают пересылки</td></tr>
+  </table>
+  <div class="warn"><span class="lbl">Безопасность</span> Только официальный Threads API (Meta app + токен). Не используй «серые» библиотеки со входом по логину/паролю — за это Meta банит аккаунт. Токен храни в защищённом файле у агента, не в открытом чате.</div>
+
+  <h2>Часть 2. Что даёшь агенту каждый раз</h2>
+  <ul class="chk">
+    <li><b>Тему или инфоповод</b> — о чём пачка постов (например «ошибки новичков в AI-агентах», «мой кейс», «разбор тренда»).</li>
+    <li><b>Сколько постов</b> сгенерить (например 5-7 вариантов).</li>
+    <li>(один раз) <b>Tone of Voice</b> и <b>примеры залетевших веток</b>, если ещё не давала.</li>
+  </ul>
+
+  <h2>Часть 3. Пайплайн по шагам (что делает агент)</h2>
+  <ol class="steps">
+    <li><div class="st">Разбирает залетевшие ветки</div>По твоим примерам выделяет рабочие паттерны: тип хука (вопрос / спорный тезис / цифра / история), длина, формат, темы, что вызывает пересылки.</li>
+    <li><div class="st">Собирает «формулу» под твою нишу</div>Фиксирует 3-5 рабочих форматов хуков и структур — как шаблоны, по которым строит посты.</li>
+    <li><div class="st">Генерит пачку постов</div>По теме и формулам пишет 5-7 вариантов постов, каждый под пересылку: сильный первый экран (хук) → ценность/мысль → строчка, которую хочется репостнуть. В твоём Tone of Voice.</li>
+    <li><div class="st">Показывает тебе на утверждение</div>Отдаёт варианты списком, ты выбираешь/правишь. Ничего не публикует без твоего «ок» (пока не включишь автопостинг).</li>
+    <li><div class="st">Публикует через официальный API</div>Одобренные посты выкладывает в Threads по токену — сразу или ставит в расписание (например 1-2 поста в день).</li>
+    <li><div class="st">Смотрит, что зашло</div>По охвату/пересылкам отмечает удачные форматы и в следующей пачке усиливает то, что сработало.</li>
+  </ol>
+  <div class="note"><span class="lbl">Почему это работает</span> Ты не гадаешь, что запостить. Агент опирается на то, что УЖЕ репостят в нише, и переупаковывает под твой голос. Регулярность + рабочие форматы = рост охвата.</div>
+
+  <h2>Часть 4. Готовые промпты для агента</h2>
+
+  <div class="promptbox"><span class="ph">Промпт 1 — разовая настройка (формула + подключение)</span>Ты мой маркетинг-агент для Threads. Настрой пайплайн.
+
+РАЗОВАЯ НАСТРОЙКА:
+1. Подключи официальный Threads API (Meta for Developers). Мой access token — [где я его положила]. Токен держи в защищённом файле, в чат не выводи. Проверь, что можешь опубликовать тестовый пост.
+2. Запомни мой Tone of Voice: [тон / обращение / запретные слова / 3-5 примеров моих фраз].
+3. Вот примеры залетевших веток в моей нише: [ссылки/тексты]. Разбери их: какой хук, длина, формат, тема, что вызывает пересылки. Собери 3-5 рабочих формул-шаблонов и сохрани в память.
+
+Дальше жди от меня тему для пачки постов.</div>
+
+  <div class="promptbox"><span class="ph">Промпт 2 — сгенерить пачку постов</span>Сгенери [5-7] постов для Threads на тему: [тема/инфоповод].
+Используй мои рабочие формулы и Tone of Voice. Каждый пост — под пересылку: сильный хук в первой строке, ценность/мысль, финальная строчка, которую хочется репостнуть.
+Формат Threads: коротко, живо, без рекламы «в лоб».
+Выдай варианты списком — я выберу и поправлю. Пока не публикуй.</div>
+
+  <div class="promptbox"><span class="ph">Промпт 3 — опубликовать / поставить в расписание</span>Опубликуй эти посты в Threads через официальный API: [номера/тексты].
+Либо поставь в расписание: [например по 1-2 поста в день в 12:00 и 19:00].
+После публикации пришли ссылки на посты. Через [день/неделю] собери по ним охват и пересылки и скажи, какие форматы сработали лучше.</div>
+
+  <h2>Часть 5. Технические детали (для тех-агента)</h2>
+  <div class="card">
+    <ul>
+      <li><b>Официальный API:</b> Threads API через Meta Graph — создать App на developers.facebook.com, добавить Threads API, пройти OAuth аккаунтом Threads, получить long-lived access token.</li>
+      <li><b>Публикация:</b> двухшаговая — создать media container (текст/картинка/карусель), затем publish. Есть эндпоинты для текста, изображений, каруселей.</li>
+      <li><b>Пример-репо (официальное, Meta):</b> github.com/fbsamples/threads_api — рабочий пример публикации.</li>
+      <li><b>Расписание:</b> агент на сервере 24/7 постит по крону/хукам — автопостинг без твоего участия.</li>
+      <li><b>Аналитика:</b> Threads API отдаёт метрики (views, likes, reposts) по своим постам — по ним отбираем рабочие форматы.</li>
+    </ul>
+  </div>
+
+  <div class="warn"><span class="lbl">Не использовать</span> junhoyeo/threads-api, Danie1/threads-api и другие reverse-engineered библиотеки со входом по логину/паролю — оба заброшены (архив) и грозят баном аккаунта. Только официальный API.</div>
+
+  <div class="foot">
+    Пайплайн-инструкция для интенсива «AI-команда на Claude». Токен Threads — личный, хранится защищённо. Только официальный Threads API (Meta). Посты всегда проходят через личный Tone of Voice — без него будет чужой голос.
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.promptbox').forEach(box => {
+  const btn = document.createElement('button')
+  btn.className = 'pcopy'; btn.textContent = 'Копировать'
+  btn.onclick = async () => {
+    const txt = box.innerText.replace(/^.*\n/, '').trim()
+    try {
+      await navigator.clipboard.writeText(txt)
+      btn.textContent = 'Скопировано ✓'; btn.classList.add('done')
+      setTimeout(() => { btn.textContent = 'Копировать'; btn.classList.remove('done') }, 1500)
+    } catch { btn.textContent = 'Выдели и скопируй' }
+  }
+  box.appendChild(btn)
+})
+</script>
+</body>
+</html>
