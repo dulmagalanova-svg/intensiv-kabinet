@@ -146,6 +146,15 @@
   .hq.open .harrow{transform:rotate(90deg)}
   .ha{display:none;padding:0 15px 14px 33px;font-size:15px;line-height:1.6;color:#3a3833}
   .ha.show{display:block}
+  /* «Задание» */
+  .hw-goal{background:#fffdf6;border:1.5px solid #f0dca0;border-radius:12px;padding:12px 15px;margin:6px 0 4px;font-size:15.5px;color:#5a4410}
+  .hw-task{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line);font-size:15.5px;color:#2a2620;line-height:1.5}
+  .hw-task:last-of-type{border-bottom:none}
+  .hw-n{flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:linear-gradient(120deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .hw-tip{background:#eaf4ee;border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0 0;font-size:14.5px;color:#1d6b39}
+  .hw-foot{margin-top:16px}
+  .hw-btn{background:#fff;border:1.5px solid var(--gold);color:#8a5a00;border-radius:11px;padding:11px 20px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit}
+  .hw-btn.on{background:linear-gradient(120deg,#F7D14B,#B9860B);color:#141414;border-color:#B9860B}
   @media(max-width:560px){.tabs button{padding:9px 10px;font-size:14px}.lcard .lgo{display:none}}
 </style>
 </head>
@@ -254,7 +263,7 @@ async function loadLesson(){
 function parseBody(html){
   const holder = document.createElement('div')
   holder.innerHTML = html
-  let data = { tc: [], tr: [], quiz: [] }
+  let data = { tc: [], tr: [], quiz: [], hw: null }
   const dataEl = holder.querySelector('#lesson-tabs')
   if(dataEl){
     try { data = JSON.parse(dataEl.textContent) } catch(e) { console.warn('lesson-tabs JSON', e) }
@@ -262,10 +271,10 @@ function parseBody(html){
     // старая сворачивающаяся плашка тайм-кодов больше не нужна — она стала вкладкой
     holder.querySelectorAll('.tcx-box').forEach(el => el.remove())
   }
-  return { body: holder, tc: data.tc || [], tr: data.tr || [], quiz: data.quiz || [] }
+  return { body: holder, tc: data.tc || [], tr: data.tr || [], quiz: data.quiz || [], hw: data.hw || null }
 }
 
-function renderTabs({ body, tc, tr, quiz }){
+function renderTabs({ body, tc, tr, quiz, hw }){
   const host = document.getElementById('tabsHost')
 
   // промпты и ссылки берём прямо из конспекта — они там уже есть
@@ -310,6 +319,8 @@ function renderTabs({ body, tc, tr, quiz }){
       tr.map(([sec, t, s]) => `<div class="trrow"><span class="tct" data-sec="${sec}">${t}</span><span class="trs">${esc(s)}</span></div>`).join('')
   }})
 
+  if(hw) panes.push({ key: 'hw', label: 'Задание', render: el => renderHw(el, hw) })
+
   panes.push({ key: 'help', label: 'Если застрял', render: el => renderHelp(el) })
 
   if(quiz.length) panes.push({ key: 'quiz', label: 'Тест', render: el => renderQuiz(el, quiz) })
@@ -353,6 +364,30 @@ function renderTabs({ body, tc, tr, quiz }){
 
 function esc(s){
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
+// ---------- «Задание»: практика урока под свою нишу ----------
+function renderHw(el, hw){
+  const key = 'hwdone_' + lessonId
+  let done = false
+  try { done = localStorage.getItem(key) === '1' } catch(e){}
+  const goal = hw.goal ? `<div class="hw-goal"><b>Цель:</b> ${esc(hw.goal)}</div>` : ''
+  const tasks = (hw.tasks || []).map((t, i) =>
+    `<div class="hw-task"><span class="hw-n">${i + 1}</span><span>${esc(t)}</span></div>`).join('')
+  const tip = hw.tip ? `<div class="hw-tip">💡 ${esc(hw.tip)}</div>` : ''
+  el.innerHTML =
+    `<div class="pane-hint">Закрепи урок на своём проекте — не «посмотрел», а «сделал своё».</div>` +
+    goal +
+    `<div class="pane-title">&gt; что сделать</div>` + tasks + tip +
+    `<div class="hw-foot"><button class="hw-btn" id="hwBtn">${done ? 'Задание выполнено ✓' : 'Отметить выполненным'}</button></div>`
+  const btn = el.querySelector('#hwBtn')
+  btn.classList.toggle('on', done)
+  btn.onclick = () => {
+    done = !done
+    try { done ? localStorage.setItem(key, '1') : localStorage.removeItem(key) } catch(e){}
+    btn.textContent = done ? 'Задание выполнено ✓' : 'Отметить выполненным'
+    btn.classList.toggle('on', done)
+  }
 }
 
 // ---------- «Если застрял»: частые затыки на любом уроке + фикс ----------
