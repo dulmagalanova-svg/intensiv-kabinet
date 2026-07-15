@@ -11,6 +11,32 @@
   .lessons .lcard.locked{opacity:.62;cursor:default}
   .lessons .lcard.locked .num{filter:grayscale(1)}
   .lessons .lockd{font-size:13px;font-weight:700;color:#9c7a00;margin-top:2px}
+
+  /* прогресс + карта пути */
+  .pbar-wrap{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;margin:6px 0 8px}
+  .pbar-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .pbar-top .pt{font-weight:800;font-size:16px;color:var(--ink)}
+  .pbar-top .pp{font-weight:800;font-size:15px;color:#9c7a00}
+  .pbar{height:12px;background:#f0ead9;border-radius:99px;overflow:hidden}
+  .pbar > i{display:block;height:100%;background:linear-gradient(90deg,#F7D14B,#B9860B);border-radius:99px;transition:width .5s ease}
+  .pbar-hint{font-size:13px;color:#8a8577;margin-top:9px}
+
+  .roadmap{margin:14px 0 4px}
+  .roadmap .rmh{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9c7a00;margin:6px 4px 10px}
+  .stage{display:flex;gap:13px;align-items:flex-start;position:relative;padding:0 0 14px 0}
+  .stage:not(:last-child)::before{content:'';position:absolute;left:15px;top:30px;bottom:-2px;width:2px;background:var(--line)}
+  .stage.done:not(:last-child)::before{background:#cfe6d6}
+  .stage .dot{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:2px solid var(--line);background:#fff;color:#b7ae97;z-index:1}
+  .stage.done .dot{background:#2f7d55;border-color:#2f7d55;color:#fff}
+  .stage.here .dot{background:linear-gradient(120deg,#F7D14B,#B9860B);border-color:#B9860B;color:#191919}
+  .stage .sbody{flex:1;padding-top:3px}
+  .stage .stt{font-weight:800;font-size:16px;color:var(--ink)}
+  .stage.here .stt{color:#8a5a00}
+  .stage .sdesc{font-size:13.5px;color:#7a756a;margin-top:1px}
+  .stage .smeta{font-size:12.5px;font-weight:700;color:#9c7a00;margin-top:4px}
+  .stage.done .smeta{color:#2f7d55}
+  .herebadge{display:inline-block;background:linear-gradient(120deg,#F7D14B,#B9860B);color:#191919;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .stage .cont{display:inline-block;margin-top:7px;font-weight:800;font-size:13.5px;color:#191919;background:linear-gradient(120deg,#F7D14B,#B9860B);border-radius:10px;padding:7px 13px;text-decoration:none}
 </style>
 </head>
 <body>
@@ -94,7 +120,9 @@ async function renderLessons(){
   const predob = lessons.filter(l => l.day === 0)
   const main = lessons.filter(l => l.day > 0)
 
-  let html = ''
+  // путь A→B — только уроки, без эфиров (эфиры считаем отдельно, в прогресс не входят)
+  const path = lessons.filter(l => !(l.slug || '').startsWith('efir'))
+  let html = buildProgress(path, doneSet) + buildRoadmap(path, doneSet, isLocked)
   if(predob.length){
     html += '<h3 class="sec">Предобучение</h3>'
     html += predob.map((l, i) => card(l, i + 1)).join('')
@@ -104,6 +132,66 @@ async function renderLessons(){
     html += main.map(l => card(l, l.day)).join('')
   }
   list.innerHTML = html
+}
+
+// ---------- прогресс-бар ----------
+function buildProgress(lessons, doneSet){
+  const total = lessons.length
+  const done = lessons.filter(l => doneSet.has(l.id)).length
+  const pct = total ? Math.round(done / total * 100) : 0
+  const hint = done === 0 ? 'Начни с предобучения — отмечай уроки галочкой, путь будет заполняться.'
+    : done === total ? 'Весь путь пройден. Ты собрала работающую команду агентов 🎉'
+    : `Осталось ${total - done} — ты уже прошла больше, чем кажется.`
+  return `<div class="pbar-wrap">
+    <div class="pbar-top"><span class="pt">Твой прогресс</span><span class="pp">${done} из ${total} · ${pct}%</span></div>
+    <div class="pbar"><i style="width:${pct}%"></i></div>
+    <div class="pbar-hint">${hint}</div>
+  </div>`
+}
+
+// ---------- карта пути «ты здесь» ----------
+function buildRoadmap(lessons, doneSet, isLocked){
+  // этапы пути A→B по номеру дня урока
+  const STAGES = [
+    { name: 'Старт · подготовка', desc: 'Установка, аккаунты, VPN — фундамент', days: [0] },
+    { name: 'Твой первый агент', desc: 'Живой агент в Telegram, его личность и память', days: [1, 2] },
+    { name: 'Навыки и команда', desc: 'Скиллы, второй агент, общая память команды', days: [3, 4] },
+    { name: 'Автономия: сервер и сервисы', desc: 'Работа 24/7 на сервере, подключение MCP', days: [5, 6] },
+    { name: 'Прокачка навыков', desc: 'Свои скиллы, документация бизнеса, установка через агента', days: [7, 8] },
+    { name: 'Продвинутый уровень', desc: 'Другие мозги (Codex, Hermes), общий мозг G-Brain', days: [9, 10, 11] },
+  ]
+  const stages = STAGES.map(s => {
+    const ls = lessons.filter(l => s.days.includes(l.day))
+    return { ...s, lessons: ls, total: ls.length,
+             done: ls.filter(l => doneSet.has(l.id)).length }
+  }).filter(s => s.total > 0)
+
+  // «ты здесь» — первый этап, где ещё не всё пройдено
+  const hereIdx = stages.findIndex(s => s.done < s.total)
+
+  const rows = stages.map((s, i) => {
+    const complete = s.done === s.total
+    const here = i === hereIdx
+    const cls = complete ? 'done' : here ? 'here' : ''
+    const dot = complete ? '✓' : (i + 1)
+    // ссылка «продолжить» — на первый непройденный незакрытый урок этапа
+    let cont = ''
+    if(here){
+      const next = s.lessons.find(l => !doneSet.has(l.id) && !isLocked(l))
+      if(next) cont = `<a class="cont" href="/lesson.html?id=${next.id}">Продолжить →</a>`
+    }
+    return `<div class="stage ${cls}">
+      <div class="dot">${dot}</div>
+      <div class="sbody">
+        <div class="stt">${s.name}${here ? '<span class="herebadge">ты здесь</span>' : ''}</div>
+        <div class="sdesc">${s.desc}</div>
+        <div class="smeta">${complete ? 'Пройдено' : s.done + ' из ' + s.total + ' уроков'}</div>
+        ${cont}
+      </div>
+    </div>`
+  }).join('')
+
+  return `<div class="roadmap"><div class="rmh">Карта пути · от нуля до работающего агента</div>${rows}</div>`
 }
 </script>
 </body>
