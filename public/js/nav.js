@@ -15,6 +15,7 @@ export function renderNav(active){
         ${item('/lessons.html', 'materialy', 'Материалы')}
         ${item('/slovar.html', 'slovar', 'Словарь')}
         ${item('/ssylki.html', 'ssylki', 'Ссылки')}
+        ${item('/shablony.html', 'shablony', 'Шаблоны')}
         ${item('/lenta.html', 'lenta', 'Лента')}
         ${item('/profil.html', 'profil', 'Профиль')}
       </nav>
