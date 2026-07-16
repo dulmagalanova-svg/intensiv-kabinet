@@ -47,6 +47,7 @@
   <h2 style="margin-bottom:4px">Материалы</h2>
   <p class="lead">Уроки интенсива. Открывай по очереди, отмечай пройденное галочкой — прогресс сохраняется.</p>
 
+  <div id="adminbar"></div>
   <div id="list"><div class="center">Загружаю…</div></div>
 </main>
 
@@ -72,6 +73,12 @@ async function renderLessons(){
   const me = await currentUser()
   const { data: meProf } = await supabase.from('profiles').select('is_admin').eq('id', me.id).maybeSingle()
   const isAdmin = !!(meProf && meProf.is_admin)
+
+  // админ-панель: ссылка на ответы учеников (ученики её не видят)
+  if(isAdmin){
+    document.getElementById('adminbar').innerHTML =
+      '<a class="btn" style="display:inline-block;text-decoration:none;text-align:center;max-width:280px;margin-bottom:6px" href="/admin-survey.html">Ответы учеников (опрос)</a>'
+  }
 
   // RLS вернёт уроки только оплаченному. Пусто → либо не оплачен, либо нет уроков.
   const { data: lessons, error } = await supabase
