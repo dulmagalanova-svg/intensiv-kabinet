@@ -51,12 +51,37 @@ create table if not exists public.homework (
   created_at timestamptz not null default now()
 );
 
+-- расписание эфиров (Лента)
+create table if not exists public.schedule (
+  id int primary key,
+  session_number int,
+  title text not null,
+  description text,
+  starts_at timestamptz,
+  zoom_url text,
+  replay_url text,
+  sort int not null default 0
+);
+
+-- ответы на опрос «почему купила» (обязателен перед доступом к урокам)
+-- одна строка на ученика (unique user_id); гейт в auth.js проверяет её наличие
+create table if not exists public.survey_responses (
+  id bigint generated always as identity primary key,
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  segment text,
+  ai_level text,
+  q2 text, q3 text, q4 text, q5 text, q6 text, q7 text,
+  created_at timestamptz not null default now()
+);
+
 -- ============ RLS ============
 
 alter table public.profiles enable row level security;
 alter table public.lessons  enable row level security;
 alter table public.progress enable row level security;
 alter table public.homework enable row level security;
+alter table public.schedule enable row level security;
+alter table public.survey_responses enable row level security;
 
 -- ВАЖНО: проверки paid/is_admin вынесены в SECURITY DEFINER функции.
 -- Если ссылаться на profiles прямо в политике profiles — Postgres даёт
@@ -90,6 +115,20 @@ drop policy if exists "own homework" on public.homework;
 create policy "own homework" on public.homework
   for all using (auth.uid() = user_id or public.is_admin())
   with check (auth.uid() = user_id);
+
+-- расписание: видно оплаченным
+drop policy if exists "schedule for paid" on public.schedule;
+create policy "schedule for paid" on public.schedule
+  for select using (public.is_paid());
+
+-- опрос: ученик создаёт свой ответ и видит его; админ видит все ответы
+drop policy if exists "own survey insert" on public.survey_responses;
+create policy "own survey insert" on public.survey_responses
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "own survey select" on public.survey_responses;
+create policy "own survey select" on public.survey_responses
+  for select using (auth.uid() = user_id or public.is_admin());
 
 -- ============ ТРИГГЕР АВТО-ПРОФИЛЯ ============
 -- при регистрации создаём профиль; если email уже оплачен — сразу paid=true
