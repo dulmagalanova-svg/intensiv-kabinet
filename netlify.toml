@@ -5,3 +5,9 @@
 # SPA-страницы статичны, отдельная сборка не нужна.
 [build.environment]
   NODE_VERSION = "20"
+
+# короткий адрес для админ-страницы ответов опроса (доступ всё равно только у is_admin)
+[[redirects]]
+  from = "/admin"
+  to = "/admin-survey.html"
+  status = 200
