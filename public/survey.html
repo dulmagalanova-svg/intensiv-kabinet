@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пара вопросов перед стартом — Кабинет интенсива</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .swrap{max-width:640px;margin:0 auto;padding:0 20px}
+  .intro{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:16px 0;font-size:15.5px;color:#4a463d}
+  .q{border:1.5px solid var(--line);border-radius:14px;padding:15px 17px;margin:14px 0;background:#fff}
+  .q .qt{font-weight:800;font-size:16px;color:var(--ink);margin-bottom:10px}
+  .q .qt .req{color:#b23b3b}
+  .opts label{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;margin:7px 0;cursor:pointer;font-size:15px}
+  .opts label:hover{background:var(--soft)}
+  .opts input{width:18px;height:18px;accent-color:var(--gold)}
+  textarea{width:100%;min-height:84px;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:15px;resize:vertical;color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--gold)}
+  .sub{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,#fff 30%);padding:16px 0 22px}
+  .sub button{width:100%;background:linear-gradient(110deg,var(--gold2),var(--gold));color:#141414;font-weight:800;font-size:16px;border:none;border-radius:12px;padding:14px;cursor:pointer}
+  .sub button:disabled{opacity:.55;cursor:default}
+  .err{color:#b23b3b;font-size:14px;margin-top:8px;text-align:center;min-height:18px}
+  .load{text-align:center;padding:60px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<main class="swrap">
+  <div id="load" class="load">Загрузка…</div>
+  <div id="form" style="display:none">
+    <h2 style="margin-bottom:2px">Пара вопросов перед стартом 🙌</h2>
+    <div class="intro">Ответь честно и своими словами — это займёт 3 минуты и очень поможет сделать интенсив полезнее именно под тебя. После ответа откроются все уроки.</div>
+
+    <div class="q">
+      <div class="qt">1. Чем ты занимаешься? <span class="req">*</span></div>
+      <div class="opts">
+        <label><input type="radio" name="segment" value="Эксперт / наставник"> Эксперт / наставник</label>
+        <label><input type="radio" name="segment" value="Блогер / контент"> Блогер / контент</label>
+        <label><input type="radio" name="segment" value="Свой бизнес"> Свой бизнес</label>
+        <label><input type="radio" name="segment" value="В найме или только начинаю"> В найме или только начинаю</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qt">2. На каком уровне ты была с ИИ до интенсива? <span class="req">*</span></div>
+      <div class="opts">
+        <label><input type="radio" name="ai_level" value="Почти не пользовалась"> Почти не пользовалась</label>
+        <label><input type="radio" name="ai_level" value="Иногда спрашивала ChatGPT / нейросети в браузере"> Иногда спрашивала ChatGPT / нейросети в браузере</label>
+        <label><input type="radio" name="ai_level" value="Пользуюсь нейросетями в работе почти каждый день"> Пользуюсь нейросетями в работе почти каждый день</label>
+        <label><input type="radio" name="ai_level" value="Уже пробовала собирать техническое — боты, автоматизации, агенты"> Уже пробовала собирать техническое — боты, автоматизации, агенты</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <div class="qt">3. Что происходило в твоём деле, из-за чего ты решила искать решение? Что достало больше всего? <span class="req">*</span></div>
+      <textarea id="q2" placeholder="Например: тону в рутине, не успеваю отвечать клиентам, всё держится на мне…"></textarea>
+    </div>
+    <div class="q">
+      <div class="qt">4. Что ты уже пробовала до интенсива, чтобы это решить — сама, помощники, курсы, нейросети? Почему не сработало или не хватило? <span class="req">*</span></div>
+      <textarea id="q3"></textarea>
+    </div>
+    <div class="q">
+      <div class="qt">5. Что стало последней каплей — в какой момент ты решила «всё, беру интенсив»? <span class="req">*</span></div>
+      <textarea id="q4"></textarea>
+    </div>
+    <div class="q">
+      <div class="qt">6. Какую ОДНУ задачу ты мечтаешь снять с себя в первую очередь? <span class="req">*</span></div>
+      <textarea id="q5"></textarea>
+    </div>
+    <div class="q">
+      <div class="qt">7. Как изменится твоя работа и жизнь, когда агенты заработают? Что почувствуешь? <span class="req">*</span></div>
+      <textarea id="q6"></textarea>
+    </div>
+    <div class="q">
+      <div class="qt">8. Что чуть НЕ остановило тебя от покупки? Какие были сомнения? <span class="req">*</span></div>
+      <textarea id="q7"></textarea>
+    </div>
+
+    <div class="sub">
+      <button id="send">Ответить и открыть уроки →</button>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth } from '/js/auth.js'
+
+const session = await requireAuth()
+if(session){
+  const { data: u } = await supabase.auth.getUser()
+  const uid = u.user.id
+  // админ (Mrs) не проходит опрос
+  const { data: prof } = await supabase.from('profiles').select('is_admin').eq('id', uid).maybeSingle()
+  if(prof && prof.is_admin){ location.href = '/lessons.html' }
+  else {
+    // уже отвечал → сразу в уроки
+    const { data: prev, error } = await supabase.from('survey_responses').select('id').eq('user_id', uid).limit(1)
+    if(!error && prev && prev.length){ location.href = '/lessons.html' }
+    else { showForm(uid) }
+  }
+}
+
+function showForm(uid){
+  document.getElementById('load').style.display = 'none'
+  document.getElementById('form').style.display = 'block'
+  const btn = document.getElementById('send')
+  const err = document.getElementById('err')
+  btn.onclick = async () => {
+    const segment = (document.querySelector('input[name="segment"]:checked') || {}).value || ''
+    const ai_level = (document.querySelector('input[name="ai_level"]:checked') || {}).value || ''
+    const q = id => document.getElementById(id).value.trim()
+    const row = { user_id: uid, segment, ai_level,
+      q2: q('q2'), q3: q('q3'), q4: q('q4'), q5: q('q5'), q6: q('q6'), q7: q('q7') }
+    if(!segment || !ai_level || !row.q2 || !row.q3 || !row.q4 || !row.q5 || !row.q6 || !row.q7){
+      err.textContent = 'Пожалуйста, ответь на все вопросы 🙏'; return
+    }
+    btn.disabled = true; err.textContent = ''
+    const { error } = await supabase.from('survey_responses').insert(row)
+    if(error){ err.textContent = 'Не удалось сохранить: ' + error.message; btn.disabled = false; return }
+    location.href = '/lessons.html'
+  }
+}
+</script>
+</body>
+</html>
