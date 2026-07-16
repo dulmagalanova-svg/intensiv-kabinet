@@ -54,13 +54,13 @@
 
 <script type="module">
 import { supabase } from '/js/supabase-client.js'
-import { requireAuth, currentUser } from '/js/auth.js'
+import { requireAuth, requireSurvey, currentUser } from '/js/auth.js'
 import { renderNav } from '/js/nav.js'
 
 const PAYFORM = 'https://payform.ru/mrbKtEd/'
 
 const session = await requireAuth()
-if(session){
+if(session && await requireSurvey()){
   renderNav('materialy')
   renderLessons()
 }
