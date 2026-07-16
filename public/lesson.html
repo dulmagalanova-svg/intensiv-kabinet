@@ -178,7 +178,7 @@
 
 <script type="module">
 import { supabase } from '/js/supabase-client.js'
-import { requireAuth, signOut, currentUser } from '/js/auth.js'
+import { requireAuth, requireSurvey, signOut, currentUser } from '/js/auth.js'
 
 document.getElementById('logout').onclick = () => signOut()
 
@@ -187,7 +187,7 @@ const lessonId = parseInt(params.get('id'), 10)
 
 const session = await requireAuth()
 let user = null
-if(session){
+if(session && await requireSurvey()){
   user = await currentUser()
   document.getElementById('who').textContent = user?.email || ''
   loadLesson()
