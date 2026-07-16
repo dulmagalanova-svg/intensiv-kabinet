@@ -39,3 +39,24 @@ export async function currentUser(){
   const { data } = await supabase.auth.getUser()
   return data.user || null
 }
+
+// Опрос-ворота: пока обязательный опрос не заполнен — уводим на /survey.html.
+// Возвращает true, если можно показывать уроки; false — если увели на опрос.
+// FAIL-OPEN: любая ошибка проверки (нет таблицы / сбой сети) → пропускаем,
+// чтобы техническая проблема НИКОГДА не заперла оплаченные уроки. Запираем
+// только явный случай «таблица есть, ответа нет».
+export async function requireSurvey(){
+  try {
+    const { data: u } = await supabase.auth.getUser()
+    if(!u.user) return true
+    // админ (Mrs) опрос не проходит — предпросмотр
+    const { data: prof } = await supabase.from('profiles').select('is_admin').eq('id', u.user.id).maybeSingle()
+    if(prof && prof.is_admin) return true
+    const { data, error } = await supabase
+      .from('survey_responses').select('id').eq('user_id', u.user.id).limit(1)
+    if(error) return true                 // fail-open
+    if(data && data.length) return true    // уже ответил
+    location.href = '/survey.html'         // не ответил → на опрос
+    return false
+  } catch(e){ return true }
+}
