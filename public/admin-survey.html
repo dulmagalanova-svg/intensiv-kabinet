@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ответы учеников — Админ</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .awrap{max-width:820px;margin:0 auto;padding:0 20px 40px}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .top a{font-size:14px;color:var(--muted);text-decoration:none}
+  .cnt{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .tally{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .chip{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13.5px;color:#4a463d}
+  .chip b{color:var(--ink)}
+  .r{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;background:#fff}
+  .r .h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px}
+  .r .em{font-weight:800;font-size:15.5px;color:var(--ink)}
+  .r .dt{font-size:13px;color:var(--muted)}
+  .r .tags{margin:2px 0 8px}
+  .r .tag{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:13px;margin:0 6px 6px 0;color:#4a463d}
+  .r .qa{margin:9px 0}
+  .r .qq{font-size:13px;color:var(--muted);margin-bottom:2px}
+  .r .aa{font-size:15px;color:var(--ink);white-space:pre-wrap;line-height:1.5}
+  .load{text-align:center;padding:60px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="awrap">
+  <div class="top"><h2 style="margin:0">Ответы учеников</h2><a href="/lessons.html">← к урокам</a></div>
+  <div id="cnt" class="cnt"></div>
+  <div id="tally" class="tally"></div>
+  <div id="load" class="load">Загрузка…</div>
+  <div id="list"></div>
+</main>
+
+<script type="module">
+import { supabase } from '/js/supabase-client.js'
+import { requireAuth } from '/js/auth.js'
+
+// подписи вопросов (совпадают с survey.html; q1/сегмент и уровень ИИ показаны тегами)
+const LABELS = {
+  q2: 'Что происходило в деле / что достало больше всего',
+  q3: 'Что уже пробовала / почему не сработало',
+  q4: 'Последняя капля — почему решила брать',
+  q5: 'Одну задачу мечтает снять с себя первой',
+  q6: 'Как изменится работа и жизнь',
+  q7: 'Что чуть НЕ остановило от покупки',
+}
+
+const session = await requireAuth()
+if(session){
+  const { data: u } = await supabase.auth.getUser()
+  const { data: prof } = await supabase.from('profiles').select('is_admin').eq('id', u.user.id).maybeSingle()
+  if(!prof || !prof.is_admin){ location.href = '/lessons.html' }   // не админ — не пускаем
+  else render()
+}
+
+async function render(){
+  const { data: rows, error } = await supabase.from('survey_responses')
+    .select('*').order('created_at', { ascending: false })
+  if(error){ document.getElementById('load').textContent = 'Ошибка загрузки: ' + error.message; return }
+
+  const { data: profs } = await supabase.from('profiles').select('id,email')
+  const emailById = {}; (profs||[]).forEach(p => { emailById[p.id] = p.email })
+
+  document.getElementById('load').style.display = 'none'
+  document.getElementById('cnt').textContent = 'Всего ответов: ' + rows.length
+
+  const tally = key => { const m = {}; rows.forEach(r => { const v = r[key] || '—'; m[v] = (m[v]||0)+1 }); return m }
+  const chips = []
+  for(const [k,v] of Object.entries(tally('segment'))) chips.push('<span class="chip">'+esc(k)+': <b>'+v+'</b></span>')
+  for(const [k,v] of Object.entries(tally('ai_level'))) chips.push('<span class="chip">'+esc(k)+': <b>'+v+'</b></span>')
+  document.getElementById('tally').innerHTML = chips.join('')
+
+  document.getElementById('list').innerHTML = rows.map(r => {
+    const email = emailById[r.user_id] || r.user_id
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ru-RU') : ''
+    const qa = Object.keys(LABELS).map(k => r[k]
+      ? '<div class="qa"><div class="qq">'+esc(LABELS[k])+'</div><div class="aa">'+esc(r[k])+'</div></div>' : '').join('')
+    return '<div class="r"><div class="h"><span class="em">'+esc(email)+'</span><span class="dt">'+esc(dt)+'</span></div>'
+      + '<div class="tags">'
+      + (r.segment ? '<span class="tag">'+esc(r.segment)+'</span>' : '')
+      + (r.ai_level ? '<span class="tag">'+esc(r.ai_level)+'</span>' : '')
+      + '</div>' + qa + '</div>'
+  }).join('')
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
+</script>
+</body>
+</html>
